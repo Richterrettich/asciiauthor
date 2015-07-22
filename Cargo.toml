@@ -1,0 +1,10 @@
+[package]
+name = "ghostwriter"
+version = "0.1.0"
+authors = ["Rene Richter <Richterrettich@gmail.com>"]
+
+[dependencies]
+clap = "*"
+mustache = "*"
+git2 = "0.2"
+term-painter = "*"
