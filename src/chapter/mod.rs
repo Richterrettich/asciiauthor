@@ -1,13 +1,17 @@
 extern crate clap;
+extern crate term_painter;
+
 use self::clap::ArgMatches;
-use std::io::Error;
 use std::os;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
 use std::env;
 use std::io::Read;
+use std::io::{Write,Error};
 use error;
+use self::term_painter::{ToStyle};
+use self::term_painter::Color::*;
 
 
 
@@ -17,30 +21,59 @@ enum Location {
 }
 
 pub fn chapter(arguments: &ArgMatches) -> Result<(),error::BookError> {
+  let curret_dir = try!(env::current_dir());
+  let p = curret_dir.to_str().unwrap();
   let name = arguments.value_of("name").unwrap();//safe. name is required argument.
-  match find_content_root() {
-      Location::InScope(path,level) => add_part(name,&*path,level),
-      Location::OutOfScope => Err(error::BookError{message : "You are not within a project directory"})
+  match find_content_root(p) {
+      Location::InScope(path,level) => add_part(name,p,level),
+      Location::OutOfScope => Err(error::BookError::NormalBookError("not within project directory."))
   }
 }
 
 fn add_part(title: &str,path: &str,level : u8) -> Result<(),error::BookError> {
-
-    Ok(())
+  let new_number = try!(find_last_number(path));
+  create_dir!(path,&*format!("{}_{}",new_number,title));
+  let mut headings = "=".to_string();
+  //include::../includes/config.adoc[]
+  let mut options_include = "include::".to_string();
+  for _i in 0 .. level {
+    headings.push_str("=");
+    options_include.push_str("../")
+  }
+  options_include.push_str("includes/options.adoc[]");
+  create_file!(path,&*format!("{}_{}/index.adoc",new_number,title),
+"{} {}
+{}
+",headings,title,options_include);
+  
+  Ok(())
 }
 
 
-fn find_last_number(path: &str) -> u16 {
-    
+fn find_last_number(path: &str) -> Result<u16,Error> {
+  let mut highest_number = 0;
+  for entry in try!(fs::read_dir(path)) {
+    let dir = try!(entry);
+    if dir.file_type().unwrap().is_dir() {
+      let raw_file_name =  dir.file_name();
+      let file_name = raw_file_name.to_str().unwrap();
+      if file_name.contains("_") {
+        let first_parts: Vec<&str> = file_name.split(".").collect();
+        if let Ok(number) = first_parts[0].parse::<u16>() {
+          highest_number = if number > highest_number {
+            number
+          } else {
+            highest_number
+          };
+        }
+      }
+    }
+  }
+  Ok(highest_number)
 }
 
 
-fn find_content_root() -> Location {
-    let curret_dir = match env::current_dir(){
-        Ok(dir) => dir,
-        Err(err) => return Location::OutOfScope
-    };
-    let p = curret_dir.to_str().unwrap();
+fn find_content_root(p: &str) -> Location {
     let mut buff = "/".to_string();
     let mut root = Location::OutOfScope;
     let parts : Vec<&str> = p.split("/content/").collect();
