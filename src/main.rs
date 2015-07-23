@@ -15,11 +15,6 @@ fn main() {
                                     .arg(Arg::with_name("name")
                                         .required(true)
                                         .help("The name of the book")))
-                        .subcommand(SubCommand::with_name("chapter")
-                                    .about("creates a new chapter")
-                                    .arg(Arg::with_name("name")
-                                         .required(true)
-                                         .help("the name of the chapter.")))
                         .subcommand(SubCommand::with_name("section")
                                     .about("creates a new section")
                                     .arg(Arg::with_name("name")
@@ -29,7 +24,6 @@ fn main() {
 
   match matches.subcommand() {
       ("init", Some(matches))   => print_result(init::init(matches)),
-      ("chapter", Some(matches)) => print_result(chapter::chapter(matches)),
       ("section", Some(matches)) => print_result(section::section(matches)),
       _                         => {},
   };

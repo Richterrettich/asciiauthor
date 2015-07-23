@@ -21,7 +21,7 @@ pub fn init (arguments: &ArgMatches) -> Result<(),Error> {
   let name = arguments.value_of("name").unwrap();//safe. name is required argument.
   let user_name = get_user_information("user.name");
   let user_email = get_user_information("user.email");
-  create_dir!(name,"src");
+  create_dir!(name,"content");
   create_dir!(name,"includes");
   println!("{}  git repository",Green.bold().paint("Initialize"));
   Repository::init(name).ok();
@@ -47,7 +47,7 @@ pub fn init (arguments: &ArgMatches) -> Result<(),Error> {
 :listing-caption: Listing
 :pdf-page-size: A4
 ");
-  create_file!(name,"src/index.adoc",
+  create_file!(name,"content/index.adoc",
 "= {}
 {} <{}>
 include::../includes/config.adoc[]
