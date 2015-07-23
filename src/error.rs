@@ -1,7 +1,9 @@
 use  std::error::Error;
+use std::fmt;
 
+#[derive(Debug)]
 pub struct BookError {
-  message: &'static str
+  pub message: &'static str
 }
 
 impl Error for BookError {
@@ -12,5 +14,10 @@ impl Error for BookError {
   fn cause(&self) -> Option<&Error> {
     return None;
   }
+}
 
+impl fmt::Display for BookError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
 }

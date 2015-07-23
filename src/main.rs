@@ -27,17 +27,17 @@ fn main() {
                                           .help("the name of the section.")))
                         .get_matches();
 
-  let result = match matches.subcommand() {
-      ("init", Some(matches))   => init::init(matches),
-      ("chapter", Some(matches)) => chapter::chapter(&matches),
-      ("section", Some(matches)) => section::section(&matches),
-      _                         => Ok(()),
+  match matches.subcommand() {
+      ("init", Some(matches))   => print_result(init::init(matches)),
+      ("chapter", Some(matches)) => print_result(chapter::chapter(matches)),
+      ("section", Some(matches)) => print_result(section::section(matches)),
+      _                         => {},
   };
 
-  match result {
-    Err(err) => println!("{}",err),
-    _ => {}
-  };
 
+}
+
+
+fn print_result<T: std::error::Error>(result: Result<(),T>) {
 
 }

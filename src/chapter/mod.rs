@@ -12,47 +12,71 @@ use error;
 
 
 enum Location {
-  Root,
-  Chapter,
-  Section,
-  SubSection,
-  SubSubSection,
+  InScope(String,u8),
   OutOfScope
 }
 
-pub fn chapter(arguments: &ArgMatches) -> Result<(),error::Error> {
+pub fn chapter(arguments: &ArgMatches) -> Result<(),error::BookError> {
   let name = arguments.value_of("name").unwrap();//safe. name is required argument.
-  let location = check_location(".".to_string(),0);
-
-  if let  Location::OutOfScope = location {
-    return error::Error{message : "You are not within a project directory".to_string()};
+  match find_content_root() {
+      Location::InScope(path,level) => add_part(name,&*path,level),
+      Location::OutOfScope => Err(error::BookError{message : "You are not within a project directory"})
   }
-  Ok(())
+}
+
+fn add_part(title: &str,path: &str,level : u8) -> Result<(),error::BookError> {
+
+    Ok(())
+}
+
+
+fn find_last_number(path: &str) -> u16 {
+    
+}
+
+
+fn find_content_root() -> Location {
+    let curret_dir = match env::current_dir(){
+        Ok(dir) => dir,
+        Err(err) => return Location::OutOfScope
+    };
+    let p = curret_dir.to_str().unwrap();
+    let mut buff = "/".to_string();
+    let mut root = Location::OutOfScope;
+    let parts : Vec<&str> = p.split("/content/").collect();
+    if parts.len() >= 1 {
+        let possible_root = format!("{}/.git/description",parts[0]);
+        let mut f = File::open(&*possible_root);
+        let mut file_content = String::new();
+        if f.is_ok() {
+          f.ok().unwrap().read_to_string(&mut file_content);
+          let content = file_content.split('_').last();
+          if content.is_some() && content.unwrap() == "book" {
+              if parts.len() == 1 {
+                  root = Location::InScope(possible_root,0);
+              } else {
+                  let last_bits: Vec<&str> = parts.last().unwrap().split("/").collect();
+                  root = Location::InScope(possible_root,last_bits.len() as u8);
+              }
+          }
+        }
+    }
+    root
 }
 
 fn check_location(path: String,depth: u8) -> Location {
-  let curr_path = format!("{}.git/description",path);
+  let curr_path = format!("{}/../.git/description",path);
   let mut f = File::open(&*curr_path);
   let mut file_content = String::new();
   if f.is_ok() {
     f.ok().unwrap().read_to_string(&mut file_content);
     let content = file_content.split('_').last();
     if content.is_some() && content.unwrap() == "book" {
-        return convert_to_location(depth);
+        return Location::InScope(path,depth);
     }
   }
   match Path::new(&*path).parent() {
     Some(p) => check_location(format!("../{}",path),depth+1),
     None => return Location::OutOfScope
-  }
-}
-
-fn convert_to_location(depth:u8) -> Location {
-  match depth {
-    0 => Location::Root,
-    1 => Location::Chapter,
-    2 => Location::Section,
-    3 => Location::SubSection,
-    _ => Location::SubSubSection,
   }
 }

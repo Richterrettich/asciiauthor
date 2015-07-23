@@ -36,4 +36,4 @@ macro_rules! check_location {
 pub mod init; // exports the module defined in init/mod.rs
 pub mod chapter;
 pub mod section;
-mod error;
+pub mod error;
