@@ -20,11 +20,20 @@ fn main() {
                                     .arg(Arg::with_name("name")
                                           .required(true)
                                           .help("the name of the section.")))
+                        .subcommand(SubCommand::with_name("move")
+                                    .about("moves a section")
+                                    .arg(Arg::with_name("old_number")
+                                          .required(true)
+                                          .help("the name of the section."))
+                                    .arg(Arg::with_name("new_number")
+                                          .required(true)
+                                          .help("the name of the section.")))
                         .get_matches();
 
   match matches.subcommand() {
       ("init", Some(matches))   => print_result(init::init(matches)),
       ("section", Some(matches)) => print_result(section::section(matches)),
+      ("move", Some(matches)) => print_result(move_command::do_move(matches)),
       _                         => {},
   };
 
@@ -33,5 +42,8 @@ fn main() {
 
 
 fn print_result<T: std::error::Error>(result: Result<(),T>) {
-
+  match result {
+    Ok(()) => {},
+    Err(err) => println!("{}",err.description())
+  }
 }

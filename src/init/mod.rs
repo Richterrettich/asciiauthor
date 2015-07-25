@@ -23,6 +23,7 @@ pub fn init (arguments: &ArgMatches) -> Result<(),Error> {
   let user_email = get_user_information("user.email");
   create_dir!(name,"content");
   create_dir!(name,"includes");
+  create_dir!(name,"content/images");
   println!("{}  git repository",Green.bold().paint("Initialize"));
   Repository::init(name).ok();
   println!("{}  git config",Green.bold().paint("Append"));
@@ -41,6 +42,7 @@ pub fn init (arguments: &ArgMatches) -> Result<(),Error> {
 ");
   create_file!(name,"includes/config.adoc",
 ":icons: font
+:imagesdir: ./images
 :toc: macro
 :stem: latexmath
 :source-highlighter: coderay

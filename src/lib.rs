@@ -45,7 +45,9 @@ macro_rules! append_file {
           try!(write!(&f,$c,$($sub),*));
       }};
 }
-
+#[macro_use]
+extern crate clap;
 pub mod init; // exports the module defined in init/mod.rs
 pub mod section;
+pub mod move_command;
 pub mod error;

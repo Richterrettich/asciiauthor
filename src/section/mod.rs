@@ -27,7 +27,7 @@ pub fn section(arguments: &ArgMatches) -> Result<(),error::BookError> {
   let name = arguments.value_of("name").unwrap();//safe. name is required argument.
   match find_content_root(p) {
       Location::InScope(path,level) => add_part(name,p,level),
-      Location::OutOfScope => Err(error::BookError::NormalBookError("not within project directory."))
+      Location::OutOfScope => Err(error::BookError::NormalBookError("not within project directory.".to_string()))
   }
 }
 

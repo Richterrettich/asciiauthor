@@ -6,7 +6,7 @@ use std::io;
 #[derive(Debug)]
 pub enum BookError {
    IoBookError(io::Error),
-   NormalBookError(&'static str)
+   NormalBookError(String)
 }
 
 impl Error for BookError {
