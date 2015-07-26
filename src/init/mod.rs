@@ -4,7 +4,6 @@ extern crate term_painter;
 
 use self::term_painter::{ToStyle};
 use self::term_painter::Color::*;
-use self::clap::ArgMatches;
 use self::git2::{Repository,Config};
 use std::env;
 use std::fs;
@@ -16,9 +15,8 @@ use self::git2::ConfigLevel;
 
 
 
-pub fn init (arguments: &ArgMatches) -> Result<(),Error> {
+pub fn init (name: &str) -> Result<(),Error> {
 
-  let name = arguments.value_of("name").unwrap();//safe. name is required argument.
   let user_name = get_user_information("user.name");
   let user_email = get_user_information("user.email");
   create_dir!(name,"content");
@@ -34,31 +32,25 @@ pub fn init (arguments: &ArgMatches) -> Result<(),Error> {
 
   cfg.set_str("push.default","simple").ok();
   create_file!(name,".gitignore",
-"**/*.html
-**/*.pdf
-**/*.pdfmarks
-**/*.textclippings
-**/.DS_Store
-");
+  "**/*.html\n\
+  **/*.pdf\n\
+  **/*.pdfmarks\n\
+  **/*.textclippings\n\
+  **/.DS_Store\n");
   create_file!(name,"includes/config.adoc",
-":icons: font
-:imagesdir: ./images
-:toc: macro
-:stem: latexmath
-:source-highlighter: coderay
-:listing-caption: Listing
-:pdf-page-size: A4
-");
+  ":icons: font\n\
+  :imagesdir: ./images\n\
+  :toc: macro\n\
+  :stem: latexmath\n\
+  :source-highlighter: coderay\n\
+  :listing-caption: Listing\n\
+  :pdf-page-size: A4\n");
   create_file!(name,"content/index.adoc",
-"= {}
-{} <{}>
-include::../includes/config.adoc[]
-
-toc::[]
-",name,user_name,user_email);
-
+  "= {}\n\
+  {} <{}>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n",name.split('/').last().unwrap(),user_name,user_email);
   create_file!(name,".git/description","{}_book",name);
-
   println!("All done!");
   Ok(())
 }

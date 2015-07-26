@@ -1,7 +1,10 @@
+#[macro_use]
 extern crate clap;
 extern crate ghostwriter;
 use clap::{Arg, App, SubCommand};
 use ghostwriter::*;
+use std::env;
+
 
 fn main() {
   let matches = App::new("myapp")
@@ -20,20 +23,42 @@ fn main() {
                                     .arg(Arg::with_name("name")
                                           .required(true)
                                           .help("the name of the section.")))
+                        .subcommand(SubCommand::with_name("swap")
+                                    .about("swaps a section")
+                                    .arg(Arg::with_name("old_number")
+                                          .required(true)
+                                          .help("the first section to swap."))
+                                    .arg(Arg::with_name("new_number")
+                                          .required(true)
+                                          .help("the second section to swap.")))
                         .subcommand(SubCommand::with_name("move")
                                     .about("moves a section")
                                     .arg(Arg::with_name("old_number")
                                           .required(true)
-                                          .help("the name of the section."))
+                                          .help("the old number of the section."))
                                     .arg(Arg::with_name("new_number")
                                           .required(true)
-                                          .help("the name of the section.")))
+                                          .help("the new number of the section.")))
                         .get_matches();
 
+  let curret_dir = env::current_dir().unwrap();
+  let p = curret_dir.to_str().unwrap();
   match matches.subcommand() {
-      ("init", Some(matches))   => print_result(init::init(matches)),
-      ("section", Some(matches)) => print_result(section::section(matches)),
-      ("move", Some(matches)) => print_result(move_command::do_move(matches)),
+      ("init", Some(matches))   => print_result(init::init(matches.value_of("name").unwrap())),
+      ("section", Some(matches)) => {
+        print_result(section::section(matches.value_of("name").unwrap(),p))
+      },
+      ("swap", Some(matches)) => {
+        let old = value_t_or_exit!(matches.value_of("old_number"),u16);
+        let new = value_t_or_exit!(matches.value_of("new_number"),u16);
+        print_result(swap_command::do_swap(old,new,p))
+      },
+      ("move", Some(matches)) => {
+        let old = value_t_or_exit!(matches.value_of("old_number"),u16);
+        let new = value_t_or_exit!(matches.value_of("new_number"),u16);
+        print_result(move_command::do_move(old,new,p))
+      },
+
       _                         => {},
   };
 

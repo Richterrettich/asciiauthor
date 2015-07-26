@@ -1,124 +1,94 @@
-extern crate clap;
-extern crate term_painter;
-extern crate regex;
-
-use std::io::Read;
-use std::io::{Write,Error,BufReader};
-use std::fs;
-use self::clap::ArgMatches;
-use std::env;
+use swap_command;
 use error;
-use std::collections::btree_map::BTreeMap;
-use std::num;
+use std::collections::BTreeMap;
+use std::fs;
+use std::io::{Read,Write,Error};
 
-pub fn do_move(arguments: &ArgMatches) -> Result<(),error::BookError>{
 
-  let first = value_t_or_exit!(arguments.value_of("old_number"),u16);
-  let second = value_t_or_exit!(arguments.value_of("new_number"),u16);
 
-  let dir_entries = try!(sorted_dir_entries());
+pub fn do_move(first: u16, second: u16, dir: &str) -> Result<(),error::BookError> {
 
-  if dir_entries.contains_key(&first) && dir_entries.contains_key(&second) {
-    let first_name = dir_entries.get(&first).unwrap();
-    let second_name = dir_entries.get(&second).unwrap();
-    let new_name_of_first = format!("{}_{}",&second,&first_name);
-    let old_name_of_first = format!("{}_{}",&first,&first_name);
-    let new_name_of_second = format!("{}_{}",&first,&second_name);
-    let old_name_of_second = format!("{}_{}",&second,&second_name);
+  let dir_entries = try!(swap_command::sorted_dir_entries(dir));
 
-    let backup_name_of_second = format!("{}.{}",old_name_of_second,"bak");
+  if dir_entries.contains_key(&first) {
 
-    try!(fs::rename(&old_name_of_second,&backup_name_of_second));
-    try!(fs::rename(&old_name_of_first,&new_name_of_first));
-    try!(fs::rename(&backup_name_of_second,&new_name_of_second));
-
-    let mut f = try!(fs::File::open("index.adoc"));
-    let mut file_content = String::new();
-    f.read_to_string(&mut file_content);
-    let re = regex::Regex::new(&*format!(r"({}|{})/index.adoc[]",&first_name,&second_name)).unwrap();
-
-    re.replacen(&file_content,2,|caps : &regex::Captures|{
-      let include_match = caps.at(0).unwrap_or("");
-      if include_match == &*format!("{}/index.adoc[]",&first_name) {
-         format!("{}/index.adoc[]",&second_name)
-      } else {
-        format!("{}/index.adoc[]",&first_name)
-      }
-    });
-
-    let mut temp_file = try!(fs::File::create("temp_file"));
-    try!(write!(temp_file,"{}",file_content));
-    try!(fs::rename("temp_file","index.adoc"));
     Ok(())
   } else {
     Err(error::BookError::NormalBookError(format!("can't move section {} to {}",first,second)))
   }
+
 }
 
-
-fn sorted_dir_entries() -> Result<BTreeMap<u16,String>,Error> {
-  let path = try!(env::current_dir());
-  let read_dir = try!(fs::read_dir(path));
-
-  let mut result: BTreeMap<u16,String> = BTreeMap::new();
-
-  for entry in read_dir.filter_map(|item| item.ok())
-          .filter(|entry| entry.file_type().unwrap().is_dir())
-          .map(|dir| dir.file_name())
-          .map(|file_name| file_name.to_str().unwrap().to_string())
-          .filter(|dir_name| dir_name.contains("_")) {
-          if let Ok((number,name)) = extract_number_value(&*entry) {
-            result.insert(number,name);
-          }
+fn move_dirs(start: u16, end: u16,base: &str,dir_entries: &BTreeMap<u16,String>) -> Result<(),error::BookError> {
+  try!(fs::rename(dir(base,start,dir_entries),
+                  assemble_dir_name(base,end,dir_entries.get(&start).unwrap())));
+  if start > end {
+    for_each_dir(start-1,end,base,dir_entries,|entry,index| {
+      fs::rename(entry,assemble_dir_name(base,index+1,dir_entries.get(&index).unwrap())).unwrap();
+    });
+  } else {
+    for_each_dir(start+1,end,base,dir_entries,|entry,index| {
+      fs::rename(entry,assemble_dir_name(base,index-1,dir_entries.get(&index).unwrap())).unwrap();
+    });
   }
-  Ok(result)
+  Ok(())
 }
 
-fn extract_number_value(value:&str) -> Result<(u16,String),num::ParseIntError> {
-  let mut iter = value.split('_');
-  match iter.next().unwrap().parse::<u16>() {
-    Ok(number) => Ok((number,iter.next().unwrap().to_string())),
-    Err(err) => Err(err)
-  }
-}
+fn move_index_entries(start: u16, end: u16,base: &str,dir_entries: &BTreeMap<u16,String>) -> Result<(),error::BookError> {
+  let mut f = try!(fs::File::open(format!("{}/index.adoc",base)));
+  let mut file_content = String::new();
+  try!(f.read_to_string(&mut file_content));
 
-
-fn find_dir_by_id(id: &str) -> Option<String> {
-  let path = match env::current_dir() {
-    Ok(p) => p,
-    Err(err) => return None
-  };
-  let read_dir = match fs::read_dir(path) {
-    Ok(r) => r,
-    Err(err) => return None
-  };
-  read_dir.filter_map(|item| item.ok())
-          .filter(|entry| entry.file_type().unwrap().is_dir())
-          .map(|dir| dir.file_name())
-          .map(|file_name| file_name.to_str().unwrap().to_string())
-          .filter(|dir_name| dir_name.contains("_"))
-          .find(|dir_name| {
-            let first_parts: Vec<&str> = dir_name.split("_").collect();
-            first_parts[0] == id
-          })
-          .map(|dir_name| dir_name.to_string())
-
-  /*for entry in try!(fs::read_dir(path)) {
-    let dir = try!(entry);
-    if dir.file_type().unwrap().is_dir() {
-      let raw_file_name =  dir.file_name();
-      let file_name = raw_file_name.to_str().unwrap();
-      if file_name.contains("_") {
-        let first_parts: Vec<&str> = file_name.split("_").collect();
-        if first_parts[0] == id {
-          match_dir = Some(dir);
-          break;
-        }
-      }
+  if start > end {
+    let start_dir = dir(base,end,dir_entries);
+    let end_dir = dir(base,start,dir_entries);
+    let mut parts = file_content.split(&*start_dir);
+    let mut first_part = parts.next().unwrap().to_string();
+    let mut new_content = String::new();
+    let mut second_parts: Vec<&str>  = parts.next().unwrap().split(&*end_dir).collect();
+    for i in start-1 .. end {
+      let name  = format!("{}_{}",i+1,dir_entries.get(&i).unwrap());
+      new_content.push_str(&*format!("include::{}/index.adoc[]\n\n",name));
     }
+    second_parts[0] = &*new_content;
+    first_part.push_str(&*second_parts.connect(""));
+    let mut temp_file = try!(fs::File::create(format!("{}/temp_file",&base)));
+    try!(write!(temp_file,"{}",first_part));
+    try!(fs::rename(format!("{}/temp_file",&base),format!("{}/index.adoc",&base)));
+  } else {
+    let start_dir = dir(base,start,dir_entries);
+    let end_dir = dir(base,end,dir_entries);
+    let mut parts = file_content.split(&*start_dir);
+    let mut first_part = parts.next().unwrap().to_string();
+    let mut new_content = String::new();
+    let mut second_parts: Vec<&str> = parts.next().unwrap().split(&*end_dir).collect();
+    for i in start+1 .. end {
+      let name  = format!("{}_{}",i-1,dir_entries.get(&i).unwrap());
+      new_content.push_str(&*format!("include::{}/index.adoc[]\n\n",name));
+    }
+    second_parts[0] = &*new_content;
+     first_part.push_str(&*second_parts.connect(""));
+    let mut temp_file = try!(fs::File::create(format!("{}/temp_file",&base)));
+    try!(write!(temp_file,"{}",first_part));
+    try!(fs::rename(format!("{}/temp_file",&base),format!("{}/index.adoc",&base)));
   }
-  if let Some(dir) = match_dir {
 
-  }*/
+  Ok(())
 
+
+}
+
+fn for_each_dir<F>(start: u16, end: u16,base: &str,dir_entries: &BTreeMap<u16,String>,f: F)  where F: Fn(&str,u16) {
+  for i in start .. end {
+    f(&*dir(base,i,dir_entries),i);
+  }
+}
+
+fn dir(base: &str, number: u16, dir_entries: &BTreeMap<u16,String>) -> String {
+  let name  = dir_entries.get(&number).unwrap();
+  assemble_dir_name(base,number,name)
+}
+
+fn assemble_dir_name(base: &str, number: u16,name: &str) -> String {
+  format!("{}/{}_{}",base,number,name)
 }

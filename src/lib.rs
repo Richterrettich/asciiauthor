@@ -49,5 +49,6 @@ macro_rules! append_file {
 extern crate clap;
 pub mod init; // exports the module defined in init/mod.rs
 pub mod section;
+pub mod swap_command;
 pub mod move_command;
 pub mod error;
