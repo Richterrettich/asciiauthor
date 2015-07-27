@@ -2,6 +2,8 @@ extern crate asciiauthor;
 use asciiauthor::*;
 use std::fs;
 use std::io::Read;
+use std::ascii::AsciiExt;
+
 
 const  TEST_PROJECT_ROOT: &'static str = "test";
 
@@ -280,7 +282,7 @@ fn assert_file_content (file_name: &str, expected_content: &str) {
   let mut f = fs::File::open(file_name).unwrap();
   let read_result = f.read_to_string(&mut file_content);
   assert!(read_result.is_ok());
-  assert_eq!(expected_content,file_content);
+  assert!(expected_content.eq_ignore_ascii_case(&*file_content));
 }
 
 fn cleanup(dir: &str) {
