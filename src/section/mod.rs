@@ -28,6 +28,7 @@ pub fn section(name: &str,dir: &str) -> Result<(),error::BookError> {
 fn add_part(title: &str,path: &str,level : u8) -> Result<(),error::BookError> {
   let new_number = try!(find_last_number(path))+1;
   create_dir!(path,&*format!("{}_{}",new_number,title));
+  create_dir!(path,"images");
   let mut headings = "=".to_string();
   let mut options_include = "include::../".to_string();
   for _i in 0 .. level {
