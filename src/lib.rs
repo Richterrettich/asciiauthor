@@ -25,6 +25,15 @@ macro_rules! create_dir {
 }
 
 #[macro_export]
+macro_rules! remove_dir {
+  ($b:expr,$p:expr) => {{
+    let path = &*format!("{}/{}",$b,$p);
+    println!("{}  {}",Red.bold().paint("Remove Directory"),path);
+    try!(fs::remove_dir_all(path));
+  }}
+}
+
+#[macro_export]
 macro_rules! append_file {
     ($p:expr,$c:expr) => {{
           println!("{}  {}",Green.bold().paint("Append File"),$p);
@@ -51,4 +60,5 @@ pub mod init; // exports the module defined in init/mod.rs
 pub mod section;
 pub mod swap_command;
 pub mod move_command;
+pub mod delete_command;
 pub mod error;

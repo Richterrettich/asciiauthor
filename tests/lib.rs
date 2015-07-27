@@ -80,7 +80,7 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
 
 #[test]
 fn it_should_swap_positions_of_sections() {
-  let test_project = format!("{}/move_test",TEST_PROJECT_ROOT);
+  let test_project = format!("{}/swap_test",TEST_PROJECT_ROOT);
   cleanup(&*test_project);
   let result = init::init(&*test_project);
   assert!(result.is_ok());
@@ -103,7 +103,7 @@ fn it_should_swap_positions_of_sections() {
   "== blubb\n\
   include::../../includes/config.adoc[]\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= swap_test\n\
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -112,6 +112,168 @@ fn it_should_swap_positions_of_sections() {
 
   cleanup(&*test_project);
 }
+
+
+#[test]
+fn it_should_move_a_section_to_target_position() {
+  let test_project = format!("{}/move_test",TEST_PROJECT_ROOT);
+  cleanup(&*test_project);
+  let result = init::init(&*test_project);
+  assert!(result.is_ok());
+  let content_path = format!("{}/content",&test_project);
+  let mut section_result = section::section("blubb",&*content_path);
+  assert!(section_result.is_ok());
+
+  section_result = section::section("foo",&*content_path);
+  assert!(section_result.is_ok());
+  section_result = section::section("bar",&*content_path);
+  assert!(section_result.is_ok());
+  section_result = section::section("bazz",&*content_path);
+  assert!(section_result.is_ok());
+
+  let mut move_result = move_command::do_move(4,1,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_bazz/index.adoc[]\n\n\
+  include::2_blubb/index.adoc[]\n\n\
+  include::3_foo/index.adoc[]\n\n\
+  include::4_bar/index.adoc[]\n\n");
+
+
+  move_result = move_command::do_move(3,1,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_foo/index.adoc[]\n\n\
+  include::2_bazz/index.adoc[]\n\n\
+  include::3_blubb/index.adoc[]\n\n\
+  include::4_bar/index.adoc[]\n\n");
+
+  move_result = move_command::do_move(1,3,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_bazz/index.adoc[]\n\n\
+  include::2_blubb/index.adoc[]\n\n\
+  include::3_foo/index.adoc[]\n\n\
+  include::4_bar/index.adoc[]\n\n");
+
+
+  move_result = move_command::do_move(2,3,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_bazz/index.adoc[]\n\n\
+  include::2_foo/index.adoc[]\n\n\
+  include::3_blubb/index.adoc[]\n\n\
+  include::4_bar/index.adoc[]\n\n");
+
+  move_result = move_command::do_move(1,4,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_foo/index.adoc[]\n\n\
+  include::2_blubb/index.adoc[]\n\n\
+  include::3_bar/index.adoc[]\n\n\
+  include::4_bazz/index.adoc[]\n\n");
+
+  move_result = move_command::do_move(0,2,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_blubb/index.adoc[]\n\n\
+  include::2_foo/index.adoc[]\n\n\
+  include::3_bar/index.adoc[]\n\n\
+  include::4_bazz/index.adoc[]\n\n");
+
+  move_result = move_command::do_move(3,15,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_blubb/index.adoc[]\n\n\
+  include::2_foo/index.adoc[]\n\n\
+  include::3_bazz/index.adoc[]\n\n\
+  include::4_bar/index.adoc[]\n\n");
+
+  cleanup(&*test_project);
+}
+
+
+#[test]
+fn it_should_delete_sections() {
+  let test_project = format!("{}/delete_test",TEST_PROJECT_ROOT);
+  cleanup(&*test_project);
+  let result = init::init(&*test_project);
+  assert!(result.is_ok());
+  let content_path = format!("{}/content",&test_project);
+  let mut section_result = section::section("blubb",&*content_path);
+  assert!(section_result.is_ok());
+
+  section_result = section::section("foo",&*content_path);
+  assert!(section_result.is_ok());
+  section_result = section::section("bar",&*content_path);
+  assert!(section_result.is_ok());
+  section_result = section::section("bazz",&*content_path);
+  assert!(section_result.is_ok());
+
+  let mut delete_result = delete_command::do_remove(3,&*content_path);
+  assert!(delete_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= delete_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_blubb/index.adoc[]\n\n\
+  include::2_foo/index.adoc[]\n\n\
+  include::3_bazz/index.adoc[]\n\n");
+
+  delete_result = delete_command::do_remove(3,&*content_path);
+  assert!(delete_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= delete_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_blubb/index.adoc[]\n\n\
+  include::2_foo/index.adoc[]\n\n");
+
+
+  cleanup(&*test_project);
+}
+
+
+
 
 fn assert_file_content (file_name: &str, expected_content: &str) {
   let mut file_content = String::new();

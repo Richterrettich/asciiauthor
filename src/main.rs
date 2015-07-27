@@ -39,6 +39,11 @@ fn main() {
                                     .arg(Arg::with_name("new_number")
                                           .required(true)
                                           .help("the new number of the section.")))
+                        .subcommand(SubCommand::with_name("delete")
+                                    .about("deletes a section")
+                                    .arg(Arg::with_name("number")
+                                          .required(true)
+                                          .help("the number of the section to delete.")))
                         .get_matches();
 
   let curret_dir = env::current_dir().unwrap();
@@ -58,11 +63,13 @@ fn main() {
         let new = value_t_or_exit!(matches.value_of("new_number"),u16);
         print_result(move_command::do_move(old,new,p))
       },
+      ("delete", Some(matches)) => {
+        let number = value_t_or_exit!(matches.value_of("number"),u16);
+        print_result(delete_command::do_remove(number,p))
+      },
 
       _                         => {},
   };
-
-
 }
 
 
