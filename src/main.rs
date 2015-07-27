@@ -1,16 +1,16 @@
 #[macro_use]
 extern crate clap;
-extern crate ghostwriter;
+extern crate asciiauthor;
 use clap::{Arg, App, SubCommand};
-use ghostwriter::*;
+use asciiauthor::*;
 use std::env;
 
 
 fn main() {
-  let matches = App::new("myapp")
-                        .version("1.0")
+  let matches = App::new("asciiauthor")
+                        .version("0.1.0")
                         .author("Rene Richter <Richterrettich@gmail.com>")
-                        .about("Does awesome things")
+                        .about("Project tool for asciidoctor")
                         .subcommand_required_else_help(true)
                         .versionless_subcommands(true)
                         .subcommand(SubCommand::with_name("init")

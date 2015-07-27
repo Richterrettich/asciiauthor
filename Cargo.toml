@@ -1,5 +1,5 @@
 [package]
-name = "ghostwriter"
+name = "asciiauthor"
 version = "0.1.0"
 authors = ["Rene Richter <Richterrettich@gmail.com>"]
 

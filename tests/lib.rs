@@ -1,5 +1,5 @@
-extern crate ghostwriter;
-use ghostwriter::*;
+extern crate asciiauthor;
+use asciiauthor::*;
 use std::fs;
 use std::io::Read;
 

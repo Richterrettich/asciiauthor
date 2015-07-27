@@ -9,11 +9,17 @@ use error;
 use std::collections::btree_map::BTreeMap;
 use std::num;
 
+use self::term_painter::{ToStyle};
+use self::term_painter::Color::*;
+
 pub fn do_swap(first: u16, second: u16, dir: &str) -> Result<(),error::BookError>{
 
   let dir_entries = try!(sorted_dir_entries(dir));
 
+
+
   if dir_entries.contains_key(&first) && dir_entries.contains_key(&second) {
+    println!("{}  {}_{} with {}_{}",Yellow.bold().paint("Swapp"),first,dir_entries.get(&first).unwrap(),second,dir_entries.get(&second).unwrap());
     let first_name = dir_entries.get(&first).unwrap();
     let second_name = dir_entries.get(&second).unwrap();
     let new_name_of_first = format!("{}/{}_{}",&dir,&second,&first_name);

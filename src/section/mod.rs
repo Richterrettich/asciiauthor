@@ -19,8 +19,6 @@ enum Location {
 }
 
 pub fn section(name: &str,dir: &str) -> Result<(),error::BookError> {
-//  let curret_dir = try!(env::current_dir());
-//  let p = curret_dir.to_str().unwrap();
   match find_content_root(dir) {
       Location::InScope(_path,level) => add_part(name,dir,level),
       Location::OutOfScope => Err(error::BookError::NormalBookError("not within project directory.".to_string()))
@@ -73,8 +71,6 @@ fn find_last_number(path: &str) -> Result<u16,Error> {
 
 
 fn find_content_root(p: &str) -> Location {
-    println!("splitting the following path: {}",p);
-
     let file_name = Path::new(p).file_name().unwrap().to_str().unwrap();
     let (possible_root, depth) = if file_name == "content" {
         (p.to_string(),1)
