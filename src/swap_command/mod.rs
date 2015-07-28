@@ -73,7 +73,8 @@ pub fn sorted_dir_entries(path: &str) -> Result<BTreeMap<u16,String>,Error> {
 fn extract_number_value(value:&str) -> Result<(u16,String),num::ParseIntError> {
   let mut iter = value.split('_');
   match iter.next().unwrap().parse::<u16>() {
-    Ok(number) => Ok((number,iter.next().unwrap().to_string())),
+    Ok(number) => Ok((number,iter.collect::<Vec<&str>>().connect("_"))),
+
     Err(err) => Err(err)
   }
 }

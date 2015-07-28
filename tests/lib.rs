@@ -226,6 +226,26 @@ fn it_should_move_a_section_to_target_position() {
   include::3_bazz/index.adoc[]\n\n\
   include::4_bar/index.adoc[]\n\n");
 
+  section_result = section::section("foo_bar_bazz",&*content_path);
+  assert!(section_result.is_ok());
+
+  move_result = move_command::do_move(5,1,&*content_path);
+  assert!(move_result.is_ok());
+
+  assert_file_content(&*format!("{}/content/index.adoc",test_project),
+  "= move_test\n\
+  Rene Richter <Richterrettich@gmail.com>\n\
+  include::../includes/config.adoc[]\n\n\
+  toc::[]\n\n\
+  include::1_foo_bar_bazz/index.adoc[]\n\n\
+  include::2_blubb/index.adoc[]\n\n\
+  include::3_foo/index.adoc[]\n\n\
+  include::4_bazz/index.adoc[]\n\n\
+  include::5_bar/index.adoc[]\n\n");
+
+
+
+
   cleanup(&*test_project);
 }
 
