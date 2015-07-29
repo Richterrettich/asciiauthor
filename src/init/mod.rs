@@ -39,7 +39,6 @@ pub fn init (name: &str) -> Result<(),Error> {
   **/.DS_Store\n");
   create_file!(name,"includes/config.adoc",
   ":icons: font\n\
-  :imagesdir: ./images\n\
   :toc: macro\n\
   :stem: latexmath\n\
   :source-highlighter: coderay\n\

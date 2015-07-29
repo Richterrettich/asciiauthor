@@ -70,7 +70,7 @@ pub fn rewrite_index(dir_entries: &mut Vec<Section>,base: &str) -> Result<(),err
   for entry in dir_entries {
     let entry_name = entry.to_string();
     includes_part.push_str(&*format!(
-      ":imagesdir: {}/images\n\
+      ":imagesdir: {}\n\
       include::{}/index.adoc[]\n\n",entry_name,entry_name));
   }
   let mut temp_file = try!(fs::File::create(format!("{}/temp_file",base)));
@@ -83,13 +83,11 @@ pub fn rewrite_index(dir_entries: &mut Vec<Section>,base: &str) -> Result<(),err
 pub fn move_section_dirs(start: usize, end:usize,base: &str,dir_entries: &Vec<Section>) -> Result<(),error::BookError> {
   if start > end {
     for i in end .. start+1 {
-      println!("move {} to {}",dir(base,i,&dir_entries),assemble_dir_name(base,dir_entries[i].position+1,&*dir_entries[i].name));
       try!(fs::rename(dir(base,i,&dir_entries),
                       assemble_dir_name(base,dir_entries[i].position+1,&*dir_entries[i].name)));
     }
   } else {
     for i in start .. end+1 {
-      println!("move {} to {}",dir(base,i,&dir_entries),assemble_dir_name(base,dir_entries[i].position-1,&*dir_entries[i].name));
       try!(fs::rename(dir(base,i,&dir_entries),
                       assemble_dir_name(base,dir_entries[i].position-1,&*dir_entries[i].name)));
     }

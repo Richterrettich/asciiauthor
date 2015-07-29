@@ -46,12 +46,12 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
   if new_number == 1 {
     append_file!(&*format!("{}/index.adoc",path),
                 "//BEGIN SECTIONS\n\
-                :imagesdir: {}/images\n\
+                :imagesdir: {}\n\
                 include::{}/index.adoc[]\n\n",
                 &*section_name,&*section_name);
   } else {
     append_file!(&*format!("{}/index.adoc",path),
-                ":imagesdir: {}/images\n\
+                ":imagesdir: {}\n\
                 include::{}/index.adoc[]\n\n",
                 &*section_name,&*section_name);
   }
