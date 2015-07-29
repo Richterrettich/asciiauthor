@@ -31,8 +31,8 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
   let heading_title = util::get_heading(title);
 
   let new_number = try!(find_last_number(path))+1;
-  create_dir!(path,&*format!("{}_{}",new_number,title));
-  create_dir!(path,&*format!("{}_{}/images",new_number,title));
+  create_dir!(path,&*format!("{}_{}",new_number,heading_title));
+  create_dir!(path,&*format!("{}_{}/images",new_number,heading_title));
   let mut headings = "=".to_string();
   let mut options_include = "include::../".to_string();
   for _i in 0 .. level {
@@ -40,12 +40,12 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
     options_include.push_str("../")
   }
 
-  let section_name = format!("{}_{}",new_number,title);
+  let section_name = format!("{}_{}",new_number,heading_title);
   options_include.push_str("includes/config.adoc[]\n");
   create_file!(path,
               &*format!("{}/index.adoc",section_name),
               "{} {}\n{}\n",
-              headings,heading_title,options_include);
+              headings,title,options_include);
 
   if new_number == 1 {
     append_file!(&*format!("{}/index.adoc",path),

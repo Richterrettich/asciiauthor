@@ -15,6 +15,11 @@ fn it_should_split_the_path_properly() {
   assert_eq!(util::split_name("bla"),("bla","."));
 }
 
+#[test]
+fn it_should_create_a_propper_heading () {
+  assert_eq!(util::get_heading("bla blubb foo bar"),"bla_blubb_foo_bar");
+}
+
 
 #[test]
 fn it_should_create_a_valid_project() {
