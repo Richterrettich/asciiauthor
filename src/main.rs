@@ -55,7 +55,9 @@ fn main() {
       ("init", Some(matches))   => {
         let user_name = get_user_information("user.name");
         let user_email = get_user_information("user.email");
-        print_result(init::init(matches.value_of("name").unwrap(),&*user_email,&*user_name))
+        let raw_name = matches.value_of("name").unwrap();
+        let (name,base) = util::split_name(raw_name);
+        print_result(init::init(name,&*user_email,&*user_name,base))
       },
       ("section", Some(matches)) => {
           for v in matches.values_of("NAMES").unwrap() {
@@ -106,6 +108,8 @@ fn create_git_config(path : &Path) -> Config {
   config.add_file(path, ConfigLevel::Global, false).ok();
   config
 }
+
+
 
 fn request_user_information(config : &mut Config, property: &str) -> String {
   let mut property_value = String::new();

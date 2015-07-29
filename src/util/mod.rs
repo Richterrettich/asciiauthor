@@ -5,6 +5,7 @@ use error;
 use std::io::{Read,Write,Error};
 use std::cmp::Ord;
 use std::cmp::Ordering;
+use std::path::Path;
 
 
 pub struct Section {
@@ -125,6 +126,22 @@ pub fn extract_number_value(value:&str) -> Result<(usize,String),num::ParseIntEr
     Ok(number) => Ok((number,iter.collect::<Vec<&str>>().connect("_"))),
 
     Err(err) => Err(err)
+  }
+}
+
+pub fn split_name(raw_name: &str) -> (&str,&str) {
+  let path = Path::new(raw_name);
+  match path.parent() {
+    Some(parent) => {
+      let mut parent_str = parent.to_str().unwrap();
+      parent_str = if parent_str == "" {
+        "."
+      } else {
+        parent_str
+      };
+      (path.file_name().unwrap().to_str().unwrap(),parent_str)
+    },
+    None => (path.file_name().unwrap().to_str().unwrap(),"/"),
   }
 }
 

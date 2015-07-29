@@ -7,10 +7,21 @@ use std::io::Read;
 const  TEST_PROJECT_ROOT: &'static str = "test";
 
 #[test]
+fn it_should_split_the_path_properly() {
+  let (name,path) = util::split_name("/hugo/blubb/bla");
+  assert_eq!(name,"bla");
+  assert_eq!(path,"/hugo/blubb");
+
+  assert_eq!(util::split_name("bla"),("bla","."));
+}
+
+
+#[test]
 fn it_should_create_a_valid_project() {
+  let test_project_name = "init test";
   let test_project = format!("{}/init_test",TEST_PROJECT_ROOT);
   cleanup(&*test_project);
-  let init_result = init::init(&*test_project,"awesome@blubb.com","awesome");
+  let init_result = init::init(test_project_name,"awesome@blubb.com","awesome",TEST_PROJECT_ROOT);
 
   assert!(init_result.is_ok());
 
@@ -26,7 +37,7 @@ fn it_should_create_a_valid_project() {
   **/.DS_Store\n");
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= init_test\n\
+  "= init test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
 
@@ -36,9 +47,10 @@ fn it_should_create_a_valid_project() {
 
 #[test]
 fn it_should_create_subsequent_sections_when_in_content_root() {
+  let test_project_name = "section test";
   let test_project = format!("{}/section_test",TEST_PROJECT_ROOT);
   cleanup(&*test_project);
-  let result = init::init(&*test_project,"awesome@blubb.com","awesome");
+  let result = init::init(test_project_name,"awesome@blubb.com","awesome",TEST_PROJECT_ROOT);
   assert!(result.is_ok());
   let mut content_path = format!("{}/content",&test_project);
   let mut section_result = section::section("blubb",&*content_path);
@@ -47,7 +59,7 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   "== blubb\n\
   include::../../includes/config.adoc[]\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= section_test\n\
+  "= section test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -61,7 +73,7 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   "== foo\n\
   include::../../includes/config.adoc[]\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= section_test\n\
+  "= section test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -88,9 +100,10 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
 
 #[test]
 fn it_should_swap_positions_of_sections() {
+  let test_project_name = "swap test";
   let test_project = format!("{}/swap_test",TEST_PROJECT_ROOT);
   cleanup(&*test_project);
-  let result = init::init(&*test_project,"awesome@blubb.com","awesome");
+  let result = init::init(test_project_name,"awesome@blubb.com","awesome",TEST_PROJECT_ROOT);
   assert!(result.is_ok());
   let content_path = format!("{}/content",&test_project);
   let mut section_result = section::section("blubb",&*content_path);
@@ -111,7 +124,7 @@ fn it_should_swap_positions_of_sections() {
   "== blubb\n\
   include::../../includes/config.adoc[]\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= swap_test\n\
+  "= swap test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -127,9 +140,10 @@ fn it_should_swap_positions_of_sections() {
 
 #[test]
 fn it_should_move_a_section_to_target_position() {
+  let test_project_name = "move test";
   let test_project = format!("{}/move_test",TEST_PROJECT_ROOT);
   cleanup(&*test_project);
-  let result = init::init(&*test_project,"awesome@blubb.com","awesome");
+  let result = init::init(test_project_name,"awesome@blubb.com","awesome",TEST_PROJECT_ROOT);
   assert!(result.is_ok());
   let content_path = format!("{}/content",&test_project);
   let mut section_result = section::section("blubb",&*content_path);
@@ -146,7 +160,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -165,7 +179,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -183,7 +197,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -202,7 +216,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -220,7 +234,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -238,7 +252,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -256,7 +270,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -277,7 +291,7 @@ fn it_should_move_a_section_to_target_position() {
   assert!(move_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= move_test\n\
+  "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -302,9 +316,10 @@ fn it_should_move_a_section_to_target_position() {
 
 #[test]
 fn it_should_delete_sections() {
+  let test_project_name = "delete test";
   let test_project = format!("{}/delete_test",TEST_PROJECT_ROOT);
   cleanup(&*test_project);
-  let result = init::init(&*test_project,"awesome@blubb.com","awesome");
+  let result = init::init(test_project_name,"awesome@blubb.com","awesome",TEST_PROJECT_ROOT);
   assert!(result.is_ok());
   let content_path = format!("{}/content",&test_project);
   let mut section_result = section::section("blubb",&*content_path);
@@ -321,7 +336,7 @@ fn it_should_delete_sections() {
   assert!(delete_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= delete_test\n\
+  "= delete test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
@@ -337,7 +352,7 @@ fn it_should_delete_sections() {
   assert!(delete_result.is_ok());
 
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
-  "= delete_test\n\
+  "= delete test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
