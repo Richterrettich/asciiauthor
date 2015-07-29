@@ -1,9 +1,14 @@
 #[macro_use]
 extern crate clap;
 extern crate asciiauthor;
+extern crate git2;
 use clap::{Arg, App, SubCommand};
 use asciiauthor::*;
 use std::env;
+use git2::{Config,ConfigLevel};
+use std::path::Path;
+use std::io::{Write,Error};
+use std::io;
 
 
 fn main() {
@@ -49,7 +54,11 @@ fn main() {
   let curret_dir = env::current_dir().unwrap();
   let p = curret_dir.to_str().unwrap();
   match matches.subcommand() {
-      ("init", Some(matches))   => print_result(init::init(matches.value_of("name").unwrap())),
+      ("init", Some(matches))   => {
+        let user_name = get_user_information("user.name");
+        let user_email = get_user_information("user.email");
+        print_result(init::init(matches.value_of("name").unwrap(),&*user_email,&*user_name))
+      },
       ("section", Some(matches)) => {
         print_result(section::section(matches.value_of("name").unwrap(),p))
       },
@@ -78,4 +87,36 @@ fn print_result<T: std::error::Error>(result: Result<(),T>) {
     Ok(()) => {},
     Err(err) => println!("{}",err.description())
   }
+}
+
+fn get_user_information(property : &str) -> String {
+  let mut cfg = match Config::open_default() {
+    Ok(c) => c,
+    Err(_err) => create_git_config(env::home_dir().unwrap().as_path()),
+  };
+  let snapshot = cfg.snapshot().ok().expect("can't create a config-snapshot!");
+  match snapshot.get_str(property) {
+     Ok(name) => name.to_string(),
+     Err(_err) => request_user_information(&mut cfg,property),
+  }
+}
+
+fn create_git_config(path : &Path) -> Config {
+  let mut config = Config::new().unwrap();
+  config.add_file(path, ConfigLevel::Global, false).ok();
+  config
+}
+
+fn request_user_information(config : &mut Config, property: &str) -> String {
+  let mut property_value = String::new();
+  let prompt_value = property.split('.').last().expect("There should be some!");
+  print!("it seems that you don't have set your {} yet. Please enter your {}\n> ",prompt_value,prompt_value);
+  io::stdout().flush().ok();
+  io::stdin().read_line(&mut property_value)
+      .ok()
+      .expect("Failed to read line");
+  println!("");
+  property_value = property_value.trim_matches('\n').to_string();
+  config.set_str(property,&*property_value).ok();
+  property_value
 }
