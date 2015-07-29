@@ -4,13 +4,11 @@ extern crate term_painter;
 
 use self::term_painter::{ToStyle};
 use self::term_painter::Color::*;
-use self::git2::{Repository,Config,ConfigLevel};
-use std::env;
+use self::git2::{Repository,Config};
 use std::fs;
 use std::fs::{File};
 use std::path::Path;
 use std::io::{Write,Error};
-use std::io;
 
 
 
