@@ -54,17 +54,17 @@ fn main() {
         print_result(section::section(matches.value_of("name").unwrap(),p))
       },
       ("swap", Some(matches)) => {
-        let old = value_t_or_exit!(matches.value_of("old_number"),u16);
-        let new = value_t_or_exit!(matches.value_of("new_number"),u16);
+        let old = value_t_or_exit!(matches.value_of("old_number"),usize);
+        let new = value_t_or_exit!(matches.value_of("new_number"),usize);
         print_result(swap_command::do_swap(old,new,p))
       },
       ("move", Some(matches)) => {
-        let old = value_t_or_exit!(matches.value_of("old_number"),u16);
-        let new = value_t_or_exit!(matches.value_of("new_number"),u16);
+        let old = value_t_or_exit!(matches.value_of("old_number"),usize);
+        let new = value_t_or_exit!(matches.value_of("new_number"),usize);
         print_result(move_command::do_move(old,new,p))
       },
       ("delete", Some(matches)) => {
-        let number = value_t_or_exit!(matches.value_of("number"),u16);
+        let number = value_t_or_exit!(matches.value_of("number"),usize);
         print_result(delete_command::do_remove(number,p))
       },
 

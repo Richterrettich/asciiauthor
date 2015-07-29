@@ -2,7 +2,6 @@ extern crate asciiauthor;
 use asciiauthor::*;
 use std::fs;
 use std::io::Read;
-use std::ascii::AsciiExt;
 
 
 const  TEST_PROJECT_ROOT: &'static str = "test";
@@ -52,6 +51,8 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_blubb/images\n\
   include::1_blubb/index.adoc[]\n\n");
 
   section_result = section::section("foo",&*content_path);
@@ -64,7 +65,10 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_blubb/images\n\
   include::1_blubb/index.adoc[]\n\n\
+  :imagesdir: 2_foo/images\n\
   include::2_foo/index.adoc[]\n\n");
 
   content_path = format!("{}/1_blubb",&content_path);
@@ -76,6 +80,8 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   assert_file_content(&*format!("{}/content/1_blubb/index.adoc",test_project),
   "== blubb\n\
   include::../../includes/config.adoc[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_baz/images\n\
   include::1_baz/index.adoc[]\n\n");
   cleanup(&*test_project);
 }
@@ -109,7 +115,10 @@ fn it_should_swap_positions_of_sections() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_foo/images\n\
   include::1_foo/index.adoc[]\n\n\
+  :imagesdir: 2_blubb/images\n\
   include::2_blubb/index.adoc[]\n\n");
 
   cleanup(&*test_project);
@@ -141,9 +150,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_bazz/images\n\
   include::1_bazz/index.adoc[]\n\n\
+  :imagesdir: 2_blubb/images\n\
   include::2_blubb/index.adoc[]\n\n\
+  :imagesdir: 3_foo/images\n\
   include::3_foo/index.adoc[]\n\n\
+  :imagesdir: 4_bar/images\n\
   include::4_bar/index.adoc[]\n\n");
 
 
@@ -155,9 +169,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_foo/images\n\
   include::1_foo/index.adoc[]\n\n\
+  :imagesdir: 2_bazz/images\n\
   include::2_bazz/index.adoc[]\n\n\
+  :imagesdir: 3_blubb/images\n\
   include::3_blubb/index.adoc[]\n\n\
+  :imagesdir: 4_bar/images\n\
   include::4_bar/index.adoc[]\n\n");
 
   move_result = move_command::do_move(1,3,&*content_path);
@@ -168,9 +187,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_bazz/images\n\
   include::1_bazz/index.adoc[]\n\n\
+  :imagesdir: 2_blubb/images\n\
   include::2_blubb/index.adoc[]\n\n\
+  :imagesdir: 3_foo/images\n\
   include::3_foo/index.adoc[]\n\n\
+  :imagesdir: 4_bar/images\n\
   include::4_bar/index.adoc[]\n\n");
 
 
@@ -182,9 +206,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_bazz/images\n\
   include::1_bazz/index.adoc[]\n\n\
+  :imagesdir: 2_foo/images\n\
   include::2_foo/index.adoc[]\n\n\
+  :imagesdir: 3_blubb/images\n\
   include::3_blubb/index.adoc[]\n\n\
+  :imagesdir: 4_bar/images\n\
   include::4_bar/index.adoc[]\n\n");
 
   move_result = move_command::do_move(1,4,&*content_path);
@@ -195,9 +224,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_foo/images\n\
   include::1_foo/index.adoc[]\n\n\
+  :imagesdir: 2_blubb/images\n\
   include::2_blubb/index.adoc[]\n\n\
+  :imagesdir: 3_bar/images\n\
   include::3_bar/index.adoc[]\n\n\
+  :imagesdir: 4_bazz/images\n\
   include::4_bazz/index.adoc[]\n\n");
 
   move_result = move_command::do_move(0,2,&*content_path);
@@ -208,9 +242,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_blubb/images\n\
   include::1_blubb/index.adoc[]\n\n\
+  :imagesdir: 2_foo/images\n\
   include::2_foo/index.adoc[]\n\n\
+  :imagesdir: 3_bar/images\n\
   include::3_bar/index.adoc[]\n\n\
+  :imagesdir: 4_bazz/images\n\
   include::4_bazz/index.adoc[]\n\n");
 
   move_result = move_command::do_move(3,15,&*content_path);
@@ -221,9 +260,14 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_blubb/images\n\
   include::1_blubb/index.adoc[]\n\n\
+  :imagesdir: 2_foo/images\n\
   include::2_foo/index.adoc[]\n\n\
+  :imagesdir: 3_bazz/images\n\
   include::3_bazz/index.adoc[]\n\n\
+  :imagesdir: 4_bar/images\n\
   include::4_bar/index.adoc[]\n\n");
 
   section_result = section::section("foo_bar_bazz",&*content_path);
@@ -237,10 +281,16 @@ fn it_should_move_a_section_to_target_position() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_foo_bar_bazz/images\n\
   include::1_foo_bar_bazz/index.adoc[]\n\n\
+  :imagesdir: 2_blubb/images\n\
   include::2_blubb/index.adoc[]\n\n\
+  :imagesdir: 3_foo/images\n\
   include::3_foo/index.adoc[]\n\n\
+  :imagesdir: 4_bazz/images\n\
   include::4_bazz/index.adoc[]\n\n\
+  :imagesdir: 5_bar/images\n\
   include::5_bar/index.adoc[]\n\n");
 
 
@@ -275,8 +325,12 @@ fn it_should_delete_sections() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_blubb/images\n\
   include::1_blubb/index.adoc[]\n\n\
+  :imagesdir: 2_foo/images\n\
   include::2_foo/index.adoc[]\n\n\
+  :imagesdir: 3_bazz/images\n\
   include::3_bazz/index.adoc[]\n\n");
 
   delete_result = delete_command::do_remove(3,&*content_path);
@@ -287,7 +341,10 @@ fn it_should_delete_sections() {
   Rene Richter <Richterrettich@gmail.com>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n\
+  //BEGIN SECTIONS\n\
+  :imagesdir: 1_blubb/images\n\
   include::1_blubb/index.adoc[]\n\n\
+  :imagesdir: 2_foo/images\n\
   include::2_foo/index.adoc[]\n\n");
 
 
@@ -295,14 +352,12 @@ fn it_should_delete_sections() {
 }
 
 
-
-
 fn assert_file_content (file_name: &str, expected_content: &str) {
   let mut file_content = String::new();
   let mut f = fs::File::open(file_name).unwrap();
   let read_result = f.read_to_string(&mut file_content);
   assert!(read_result.is_ok());
-  assert!(expected_content.eq_ignore_ascii_case(&*file_content));
+  assert_eq!(expected_content,&*file_content);
 }
 
 fn cleanup(dir: &str) {

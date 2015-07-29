@@ -14,7 +14,7 @@ use std::fs::OpenOptions;
 
 
 enum Location {
-  InScope(String,u8),
+  InScope(String,usize),
   OutOfScope
 }
 
@@ -25,7 +25,7 @@ pub fn section(name: &str,dir: &str) -> Result<(),error::BookError> {
   }
 }
 
-fn add_part(title: &str,path: &str,level : u8) -> Result<(),error::BookError> {
+fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError> {
   let new_number = try!(find_last_number(path))+1;
   create_dir!(path,&*format!("{}_{}",new_number,title));
   create_dir!(path,&*format!("{}_{}/images",new_number,title));
@@ -35,20 +35,31 @@ fn add_part(title: &str,path: &str,level : u8) -> Result<(),error::BookError> {
     headings.push_str("=");
     options_include.push_str("../")
   }
+
+  let section_name = format!("{}_{}",new_number,title);
   options_include.push_str("includes/config.adoc[]\n");
   create_file!(path,
-              &*format!("{}_{}/index.adoc",new_number,title),
+              &*format!("{}/index.adoc",section_name),
               "{} {}\n{}\n",
               headings,title,options_include);
 
-  append_file!(&*format!("{}/index.adoc",path),
-              "include::{}/index.adoc[]\n\n",
-              &*format!("{}_{}",new_number,title));
+  if new_number == 1 {
+    append_file!(&*format!("{}/index.adoc",path),
+                "//BEGIN SECTIONS\n\
+                :imagesdir: {}/images\n\
+                include::{}/index.adoc[]\n\n",
+                &*section_name,&*section_name);
+  } else {
+    append_file!(&*format!("{}/index.adoc",path),
+                ":imagesdir: {}/images\n\
+                include::{}/index.adoc[]\n\n",
+                &*section_name,&*section_name);
+  }
   Ok(())
 }
 
 
-fn find_last_number(path: &str) -> Result<u16,Error> {
+fn find_last_number(path: &str) -> Result<usize,Error> {
   let mut highest_number = 0;
   for entry in try!(fs::read_dir(path)) {
     let dir = try!(entry);
@@ -57,7 +68,7 @@ fn find_last_number(path: &str) -> Result<u16,Error> {
       let file_name = raw_file_name.to_str().unwrap();
       if file_name.contains("_") {
         let first_parts: Vec<&str> = file_name.split("_").collect();
-        if let Ok(number) = first_parts[0].parse::<u16>() {
+        if let Ok(number) = first_parts[0].parse::<usize>() {
           highest_number = if number > highest_number {
             number
           } else {
@@ -79,7 +90,7 @@ fn find_content_root(p: &str) -> Location {
         let parts : Vec<&str> = p.split("/content/").collect();
         if parts.len() >= 1 {
             let last_bits: Vec<&str> = parts.last().unwrap().split("/").collect();
-            (format!("{}/content",parts[0]),(last_bits.len() as u8)+1)
+            (format!("{}/content",parts[0]),last_bits.len()+1)
         } else {
             return Location::OutOfScope;
         }
