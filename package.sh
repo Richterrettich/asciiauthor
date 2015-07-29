@@ -1,3 +1,4 @@
 #!/bin/bash
 cargo build --release
-fpm -s dir -t $1 --name asciiauthor --force --version 0.1.0 target/release/asciiauthor=/usr/bin/asciiauthor
+VERSION=$(cat Cargo.toml | grep version | awk '{gsub(/"/, "", $3);print $3}')
+fpm -s dir -t $1 --name asciiauthor --force --version $VERSION target/release/asciiauthor=/usr/bin/asciiauthor
