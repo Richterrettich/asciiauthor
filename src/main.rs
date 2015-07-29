@@ -24,10 +24,8 @@ fn main() {
                                         .required(true)
                                         .help("The name of the book")))
                         .subcommand(SubCommand::with_name("section")
-                                    .about("creates a new section")
-                                    .arg(Arg::with_name("name")
-                                          .required(true)
-                                          .help("the name of the section.")))
+                                    .args_from_usage("<NAMES>... 'names of the sections.'"))
+                                    //.about("creates a new section"))
                         .subcommand(SubCommand::with_name("swap")
                                     .about("swaps a section")
                                     .arg(Arg::with_name("old_number")
@@ -60,7 +58,9 @@ fn main() {
         print_result(init::init(matches.value_of("name").unwrap(),&*user_email,&*user_name))
       },
       ("section", Some(matches)) => {
-        print_result(section::section(matches.value_of("name").unwrap(),p))
+          for v in matches.values_of("NAMES").unwrap() {
+         		print_result(section::section(v,p));
+        	}
       },
       ("swap", Some(matches)) => {
         let old = value_t_or_exit!(matches.value_of("old_number"),usize);
