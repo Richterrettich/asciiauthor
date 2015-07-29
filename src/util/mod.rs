@@ -139,3 +139,12 @@ pub fn rearrange_entries(first: usize, last:usize,dir_entries: &mut Vec<Section>
     }
   }
 }
+
+
+pub fn get_heading(title: &str) -> String {
+  if title.contains(' ') {
+    title.split(' ').collect::<Vec<&str>>().connect("_")
+  } else {
+    title.to_string()
+  }
+}

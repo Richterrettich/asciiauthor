@@ -1,6 +1,6 @@
 [root]
 name = "asciiauthor"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "clap 1.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "git2 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",

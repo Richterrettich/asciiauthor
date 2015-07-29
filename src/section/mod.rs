@@ -7,7 +7,8 @@ use std::path::Path;
 use std::io::Read;
 use std::io::{Write,Error};
 use error;
-use self::term_painter::{ToStyle};
+use util;
+use self::term_painter::ToStyle;
 use self::term_painter::Color::*;
 use std::fs::OpenOptions;
 
@@ -26,6 +27,9 @@ pub fn section(name: &str,dir: &str) -> Result<(),error::BookError> {
 }
 
 fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError> {
+
+  let heading_title = util::get_heading(title);
+
   let new_number = try!(find_last_number(path))+1;
   create_dir!(path,&*format!("{}_{}",new_number,title));
   create_dir!(path,&*format!("{}_{}/images",new_number,title));
@@ -41,7 +45,7 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
   create_file!(path,
               &*format!("{}/index.adoc",section_name),
               "{} {}\n{}\n",
-              headings,title,options_include);
+              headings,heading_title,options_include);
 
   if new_number == 1 {
     append_file!(&*format!("{}/index.adoc",path),
