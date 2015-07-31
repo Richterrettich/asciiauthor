@@ -17,7 +17,7 @@ fn it_should_split_the_path_properly() {
 
 #[test]
 fn it_should_create_a_propper_heading () {
-  assert_eq!(util::get_heading("bla blubb foo bar"),"bla_blubb_foo_bar");
+  assert_eq!(util::replace_spaces("bla blubb foo bar"),"bla_blubb_foo_bar");
 }
 
 
@@ -98,7 +98,7 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   "== blubb\n\
   include::../../includes/config.adoc[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_baz\n\
+  :imagesdir: 1_blubb/1_baz\n\
   include::1_baz/index.adoc[]\n\n");
   cleanup(&*test_project);
 }

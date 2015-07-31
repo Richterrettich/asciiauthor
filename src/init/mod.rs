@@ -14,8 +14,8 @@ use util;
 
 
 pub fn init (name: &str, user_email: &str,user_name: &str,base: &str) -> Result<(),Error> {
-  let title = util::get_heading(name);
-  let dir_path = format!("{}/{}",base,title);
+  let dir_name = util::replace_spaces(name);
+  let dir_path = format!("{}/{}",base,dir_name);
   create_dir!(&dir_path,"content");
   create_dir!(&dir_path,"includes");
   create_dir!(&dir_path,"content/images");
@@ -46,7 +46,7 @@ pub fn init (name: &str, user_email: &str,user_name: &str,base: &str) -> Result<
   {} <{}>\n\
   include::../includes/config.adoc[]\n\n\
   toc::[]\n\n",name,user_name,user_email);
-  create_file!(&dir_path,".git/description","{}_book",title);
+  create_file!(&dir_path,".git/description","{}_book",dir_name);
   println!("All done!");
   Ok(())
 }

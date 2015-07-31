@@ -70,9 +70,10 @@ pub fn rewrite_index(dir_entries: &mut Vec<Section>,base: &str) -> Result<(),err
   let mut includes_part = "//BEGIN SECTIONS\n".to_string();
   for entry in dir_entries {
     let entry_name = entry.to_string();
+    let image_include = get_image_path(base,&*entry_name);
     includes_part.push_str(&*format!(
       ":imagesdir: {}\n\
-      include::{}/index.adoc[]\n\n",entry_name,entry_name));
+      include::{}/index.adoc[]\n\n",image_include,entry_name));
   }
   let mut temp_file = try!(fs::File::create(format!("{}/temp_file",base)));
   try!(write!(temp_file,"{}{}",first_part,includes_part));
@@ -158,10 +159,19 @@ pub fn rearrange_entries(first: usize, last:usize,dir_entries: &mut Vec<Section>
 }
 
 
-pub fn get_heading(title: &str) -> String {
+pub fn replace_spaces(title: &str) -> String {
   if title.contains(' ') {
     title.split(' ').collect::<Vec<&str>>().connect("_")
   } else {
     title.to_string()
+  }
+}
+
+pub fn get_image_path(path: &str, dir_name: &str) -> String {
+  let path_parts: Vec<&str> = path.split("/content/").collect();
+  if path_parts.len() > 1 {
+    format!("{}/{}",path_parts.last().unwrap(),dir_name)
+  } else {
+    dir_name.to_string()
   }
 }

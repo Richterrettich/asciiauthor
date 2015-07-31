@@ -28,11 +28,15 @@ pub fn section(name: &str,dir: &str) -> Result<(),error::BookError> {
 
 fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError> {
 
-  let heading_title = util::get_heading(title);
+  let dir_name = util::replace_spaces(title);
 
   let new_number = try!(find_last_number(path))+1;
-  create_dir!(path,&*format!("{}_{}",new_number,heading_title));
-  create_dir!(path,&*format!("{}_{}/images",new_number,heading_title));
+  create_dir!(path,&*format!("{}_{}",new_number,dir_name));
+
+  let image_include = util::get_image_path(path,&*format!("{}_{}",new_number,dir_name));
+  println!("path: {}",path);
+  println!("image_include: {}",image_include);
+  create_dir!(path,&*format!("{}_{}/images",new_number,dir_name));
   let mut headings = "=".to_string();
   let mut options_include = "include::../".to_string();
   for _i in 0 .. level {
@@ -40,7 +44,7 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
     options_include.push_str("../")
   }
 
-  let section_name = format!("{}_{}",new_number,heading_title);
+  let section_name = format!("{}_{}",new_number,dir_name);
   options_include.push_str("includes/config.adoc[]\n");
   create_file!(path,
               &*format!("{}/index.adoc",section_name),
@@ -52,12 +56,12 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
                 "//BEGIN SECTIONS\n\
                 :imagesdir: {}\n\
                 include::{}/index.adoc[]\n\n",
-                &*section_name,&*section_name);
+                image_include,&*section_name);
   } else {
     append_file!(&*format!("{}/index.adoc",path),
                 ":imagesdir: {}\n\
                 include::{}/index.adoc[]\n\n",
-                &*section_name,&*section_name);
+                image_include,&*section_name);
   }
   Ok(())
 }
