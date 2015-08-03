@@ -1,4 +1,6 @@
+extern crate git2;
 
+use self::git2::{Repository,Config,ConfigLevel,Signature,IndexMatchedPath,IntoCString};
 use std::fs;
 use std::num;
 use error;
@@ -6,6 +8,9 @@ use std::io::{Read,Write,Error};
 use std::cmp::Ord;
 use std::cmp::Ordering;
 use std::path::Path;
+use std::io;
+use std::env;
+
 
 
 pub struct Section {
@@ -167,6 +172,42 @@ pub fn replace_spaces(title: &str) -> String {
   }
 }
 
+pub fn reset_project() {
+
+    /*println!("syncing working directory...");
+    match repo.reset(&commit_object,ResetType::Hard,None) {
+        Ok(_empty) => Ok(()),
+        Err(err) => Err(format!("something went wrong while syncing: {}",err))
+    }*/
+}
+
+pub fn commit_project(commit_message: &str,base: &str) -> Result<(),error::BookError> {
+  let repo = try!(Repository::discover(base));
+  let content_root = repo.path().parent().unwrap();
+  let mut index = try!(repo.index());
+  let paths = vec!(".gitignore","content","includes");
+  try!(index.add_all(&paths,git2::IndexAddOption::all(),None));
+  let tree_oid = try!(index.write_tree());
+  let sig = try!(repo.signature());
+  let tree = try!(repo.find_tree(tree_oid));
+  if let Ok(master_branch) = repo.find_branch("master",git2::BranchType::Local) {
+    //let master_branch =  try!(repo.find_branch("master",git2::BranchType::Local));
+    let mut commit_oid = master_branch.get().target().unwrap();
+    let last_commit = try!(repo.find_commit(commit_oid));
+    let parent = &vec!(&last_commit)[..];
+    commit_oid = try!(repo.commit(Some("HEAD"),&sig,&sig,commit_message,&tree,parent));
+  } else {
+    let parent = &Vec::new()[..];
+    try!(repo.commit(Some("HEAD"),&sig,&sig,commit_message,&tree,parent));
+  }
+  /*try!(index.update_all(paths,None));
+  try!(index.write_tree());*/
+  println!("commit finished");
+  /*let object = try!(repo.find_object(commit,Some(git2::ObjectType::Commit)));
+  try!(repo.reset(&object,git2::ResetType::Mixed,None));*/
+  Ok(())
+}
+
 pub fn get_image_path(path: &str, dir_name: &str) -> String {
   let path_parts: Vec<&str> = path.split("/content/").collect();
   if path_parts.len() > 1 {
@@ -174,4 +215,40 @@ pub fn get_image_path(path: &str, dir_name: &str) -> String {
   } else {
     dir_name.to_string()
   }
+}
+
+
+
+pub fn get_user_information(property : &str) -> String {
+  let mut cfg = match Config::open_default() {
+    Ok(c) => c,
+    Err(_err) => create_git_config(env::home_dir().unwrap().as_path()),
+  };
+  let snapshot = cfg.snapshot().ok().expect("can't create a config-snapshot!");
+  match snapshot.get_str(property) {
+     Ok(name) => name.to_string(),
+     Err(_err) => request_user_information(&mut cfg,property),
+  }
+}
+
+fn create_git_config(path : &Path) -> Config {
+  let mut config = Config::new().unwrap();
+  config.add_file(path, ConfigLevel::Global, false).ok();
+  config
+}
+
+
+
+fn request_user_information(config : &mut Config, property: &str) -> String {
+  let mut property_value = String::new();
+  let prompt_value = property.split('.').last().expect("There should be some!");
+  print!("it seems that you don't have set your {} yet. Please enter your {}\n> ",prompt_value,prompt_value);
+  io::stdout().flush().ok();
+  io::stdin().read_line(&mut property_value)
+      .ok()
+      .expect("Failed to read line");
+  println!("");
+  property_value = property_value.trim_matches('\n').to_string();
+  config.set_str(property,&*property_value).ok();
+  property_value
 }

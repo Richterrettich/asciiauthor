@@ -1,3 +1,5 @@
+extern crate git2;
+
 use  std::error::Error;
 use std::fmt;
 use std::convert::From;
@@ -6,7 +8,7 @@ use std::io;
 #[derive(Debug)]
 pub enum BookError {
    IoBookError(io::Error),
-   NormalBookError(String)
+   NormalBookError(String),
 }
 
 impl Error for BookError {
@@ -34,5 +36,11 @@ impl fmt::Display for BookError {
 impl From<io::Error> for BookError {
   fn from(err: io::Error) ->  BookError {
     BookError::IoBookError(err)
+  }
+}
+
+impl From<git2::Error> for BookError {
+  fn from(err: git2::Error) ->  BookError {
+    BookError::NormalBookError(err.message().to_string())
   }
 }

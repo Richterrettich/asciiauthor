@@ -6,6 +6,6 @@ authors = ["Rene Richter <Richterrettich@gmail.com>"]
 [dependencies]
 clap = "*"
 mustache = "*"
-git2 = "0.2"
+git2 = "0.3"
 term-painter = "*"
 regex = "0.1.8"

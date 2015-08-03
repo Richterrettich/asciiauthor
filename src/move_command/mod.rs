@@ -11,6 +11,7 @@ use self::term_painter::Color::*;
 
 pub fn do_move(mut first: usize, mut second: usize, base: &str) -> Result<(),error::BookError> {
 
+  //try!(util::commit_project("pre move commit",base));
   if first >= 1 {
     first = first - 1;
   }
@@ -31,12 +32,9 @@ pub fn do_move(mut first: usize, mut second: usize, base: &str) -> Result<(),err
                          dir_entries[first].to_string(),
                          dir_entries[second].to_string());
 
-  println!("renaming...");
   try!(fs::rename(util::dir(base,first,&dir_entries),
                   util::assemble_dir_name(base,dir_entries[second].position,&*dir_entries[first].name)));
-  println!("moving...");
   let target_value = dir_entries[second].position;
-  println!("target value: {}",target_value);
   if first > second {
     try!(util::move_section_dirs(first-1,second,base,&dir_entries));
     util::rearrange_entries(first,second,&mut dir_entries);
@@ -46,8 +44,8 @@ pub fn do_move(mut first: usize, mut second: usize, base: &str) -> Result<(),err
   }
 
   dir_entries[first].position = target_value;
-  println!("rewriting...");
   try!(util::rewrite_index(&mut dir_entries,base));
 
+  //try!(util::commit_project("post move commit",base));
   Ok(())
 }
