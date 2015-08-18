@@ -44,24 +44,33 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
     options_include.push_str("../")
   }
 
+  let mut parent_image_variable = util::extract_parent_variable(path);
   let section_name = format!("{}_{}",new_number,dir_name);
   options_include.push_str("includes/config.adoc[]\n");
   create_file!(path,
               &*format!("{}/index.adoc",section_name),
-              "{} {}\n{}\n",
-              headings,title,options_include);
+              "{}\n\
+              {} {}\n\
+              :{}: .\n\
+              ifdef::{}[]\n\
+              :{}: {{{}}}/{}\n\
+              endif::{}[]\n\
+              :imagesdir: {{{}}}/images\n\n",
+              options_include,
+              headings,title,
+              dir_name,
+              parent_image_variable,
+              dir_name,parent_image_variable,section_name,
+              parent_image_variable,
+              dir_name);
 
   if new_number == 1 {
     append_file!(&*format!("{}/index.adoc",path),
                 "//BEGIN SECTIONS\n\
-                :imagesdir: {}\n\
-                include::{}/index.adoc[]\n\n",
-                image_include,&*section_name);
+                include::{}/index.adoc[]\n\n",&*section_name);
   } else {
     append_file!(&*format!("{}/index.adoc",path),
-                ":imagesdir: {}\n\
-                include::{}/index.adoc[]\n\n",
-                image_include,&*section_name);
+                "include::{}/index.adoc[]\n\n",&*section_name);
   }
   Ok(())
 }

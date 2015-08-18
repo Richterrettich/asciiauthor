@@ -29,5 +29,6 @@ pub fn do_remove(mut number: usize,base: &str) -> Result<(),error::BookError> {
     dir_entries.remove(number);
   }
   try!(util::rewrite_index(&mut dir_entries,base));
+  try!(util::rewrite_sections(&mut dir_entries,base));
   Ok(())
 }

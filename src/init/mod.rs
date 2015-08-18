@@ -47,6 +47,7 @@ pub fn init (name: &str, user_email: &str,user_name: &str,base: &str) -> Result<
   "= {}\n\
   {} <{}>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n",name,user_name,user_email);
   create_file!(&dir_path,".git/description","{}_book",dir_name);
   println!("All done!");

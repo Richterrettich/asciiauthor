@@ -45,7 +45,7 @@ fn it_should_create_a_valid_project() {
   "= init test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
-
+  :content: .\n\n\
   toc::[]\n\n");
   cleanup(&*test_project);
 }
@@ -61,44 +61,62 @@ fn it_should_create_subsequent_sections_when_in_content_root() {
   let mut section_result = section::section("blubb",&*content_path);
   assert!(section_result.is_ok());
   assert_file_content(&*format!("{}/content/1_blubb/index.adoc",test_project),
-  "== blubb\n\
-  include::../../includes/config.adoc[]\n\n");
+  "include::../../includes/config.adoc[]\n\n\
+  == blubb\n\
+  :blubb: .\n\
+  ifdef::content[]\n\
+  :blubb: {content}/1_blubb\n\
+  endif::content[]\n\
+  :imagesdir: {blubb}/images\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
   "= section test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb\n\
   include::1_blubb/index.adoc[]\n\n");
 
   section_result = section::section("foo",&*content_path);
   assert!(section_result.is_ok());
   assert_file_content(&*format!("{}/content/2_foo/index.adoc",test_project),
-  "== foo\n\
-  include::../../includes/config.adoc[]\n\n");
+  "include::../../includes/config.adoc[]\n\n\
+  == foo\n\
+  :foo: .\n\
+  ifdef::content[]\n\
+  :foo: {content}/2_foo\n\
+  endif::content[]\n\
+  :imagesdir: {foo}/images\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
   "= section test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb\n\
   include::1_blubb/index.adoc[]\n\n\
-  :imagesdir: 2_foo\n\
   include::2_foo/index.adoc[]\n\n");
 
   content_path = format!("{}/1_blubb",&content_path);
   section_result = section::section("baz",&*content_path);
   assert!(section_result.is_ok());
   assert_file_content(&*format!("{}/content/1_blubb/1_baz/index.adoc",test_project),
-  "=== baz\n\
-  include::../../../includes/config.adoc[]\n\n");
+  "include::../../../includes/config.adoc[]\n\n\
+  === baz\n\
+  :baz: .\n\
+  ifdef::blubb[]\n\
+  :baz: {blubb}/1_baz\n\
+  endif::blubb[]\n\
+  :imagesdir: {baz}/images\n\n");
   assert_file_content(&*format!("{}/content/1_blubb/index.adoc",test_project),
-  "== blubb\n\
-  include::../../includes/config.adoc[]\n\n\
+  "include::../../includes/config.adoc[]\n\n\
+  == blubb\n\
+  :blubb: .\n\
+  ifdef::content[]\n\
+  :blubb: {content}/1_blubb\n\
+  endif::content[]\n\
+  :imagesdir: {blubb}/images\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb/1_baz\n\
   include::1_baz/index.adoc[]\n\n");
   cleanup(&*test_project);
 }
@@ -122,21 +140,30 @@ fn it_should_swap_positions_of_sections() {
 
 
   assert_file_content(&*format!("{}/content/1_foo/index.adoc",test_project),
-  "== foo\n\
-  include::../../includes/config.adoc[]\n\n");
+  "include::../../includes/config.adoc[]\n\n\
+  == foo\n\
+  :foo: .\n\
+  ifdef::content[]\n\
+  :foo: {content}/1_foo\n\
+  endif::content[]\n\
+  :imagesdir: {foo}/images\n\n");
 
   assert_file_content(&*format!("{}/content/2_blubb/index.adoc",test_project),
-  "== blubb\n\
-  include::../../includes/config.adoc[]\n\n");
+  "include::../../includes/config.adoc[]\n\n\
+  == blubb\n\
+  :blubb: .\n\
+  ifdef::content[]\n\
+  :blubb: {content}/2_blubb\n\
+  endif::content[]\n\
+  :imagesdir: {blubb}/images\n\n");
   assert_file_content(&*format!("{}/content/index.adoc",test_project),
   "= swap test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_foo\n\
   include::1_foo/index.adoc[]\n\n\
-  :imagesdir: 2_blubb\n\
   include::2_blubb/index.adoc[]\n\n");
 
   cleanup(&*test_project);
@@ -168,15 +195,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_bazz\n\
   include::1_bazz/index.adoc[]\n\n\
-  :imagesdir: 2_blubb\n\
   include::2_blubb/index.adoc[]\n\n\
-  :imagesdir: 3_foo\n\
   include::3_foo/index.adoc[]\n\n\
-  :imagesdir: 4_bar\n\
   include::4_bar/index.adoc[]\n\n");
 
 
@@ -187,15 +211,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_foo\n\
   include::1_foo/index.adoc[]\n\n\
-  :imagesdir: 2_bazz\n\
   include::2_bazz/index.adoc[]\n\n\
-  :imagesdir: 3_blubb\n\
   include::3_blubb/index.adoc[]\n\n\
-  :imagesdir: 4_bar\n\
   include::4_bar/index.adoc[]\n\n");
 
   move_result = move_command::do_move(1,3,&*content_path);
@@ -205,15 +226,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_bazz\n\
   include::1_bazz/index.adoc[]\n\n\
-  :imagesdir: 2_blubb\n\
   include::2_blubb/index.adoc[]\n\n\
-  :imagesdir: 3_foo\n\
   include::3_foo/index.adoc[]\n\n\
-  :imagesdir: 4_bar\n\
   include::4_bar/index.adoc[]\n\n");
 
 
@@ -224,15 +242,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_bazz\n\
   include::1_bazz/index.adoc[]\n\n\
-  :imagesdir: 2_foo\n\
   include::2_foo/index.adoc[]\n\n\
-  :imagesdir: 3_blubb\n\
   include::3_blubb/index.adoc[]\n\n\
-  :imagesdir: 4_bar\n\
   include::4_bar/index.adoc[]\n\n");
 
   move_result = move_command::do_move(1,4,&*content_path);
@@ -242,15 +257,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_foo\n\
   include::1_foo/index.adoc[]\n\n\
-  :imagesdir: 2_blubb\n\
   include::2_blubb/index.adoc[]\n\n\
-  :imagesdir: 3_bar\n\
   include::3_bar/index.adoc[]\n\n\
-  :imagesdir: 4_bazz\n\
   include::4_bazz/index.adoc[]\n\n");
 
   move_result = move_command::do_move(0,2,&*content_path);
@@ -260,15 +272,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb\n\
   include::1_blubb/index.adoc[]\n\n\
-  :imagesdir: 2_foo\n\
   include::2_foo/index.adoc[]\n\n\
-  :imagesdir: 3_bar\n\
   include::3_bar/index.adoc[]\n\n\
-  :imagesdir: 4_bazz\n\
   include::4_bazz/index.adoc[]\n\n");
 
   move_result = move_command::do_move(3,15,&*content_path);
@@ -278,15 +287,12 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb\n\
   include::1_blubb/index.adoc[]\n\n\
-  :imagesdir: 2_foo\n\
   include::2_foo/index.adoc[]\n\n\
-  :imagesdir: 3_bazz\n\
   include::3_bazz/index.adoc[]\n\n\
-  :imagesdir: 4_bar\n\
   include::4_bar/index.adoc[]\n\n");
 
   section_result = section::section("foo_bar_bazz",&*content_path);
@@ -299,21 +305,14 @@ fn it_should_move_a_section_to_target_position() {
   "= move test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_foo_bar_bazz\n\
   include::1_foo_bar_bazz/index.adoc[]\n\n\
-  :imagesdir: 2_blubb\n\
   include::2_blubb/index.adoc[]\n\n\
-  :imagesdir: 3_foo\n\
   include::3_foo/index.adoc[]\n\n\
-  :imagesdir: 4_bazz\n\
   include::4_bazz/index.adoc[]\n\n\
-  :imagesdir: 5_bar\n\
   include::5_bar/index.adoc[]\n\n");
-
-
-
 
   cleanup(&*test_project);
 }
@@ -344,13 +343,11 @@ fn it_should_delete_sections() {
   "= delete test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb\n\
   include::1_blubb/index.adoc[]\n\n\
-  :imagesdir: 2_foo\n\
   include::2_foo/index.adoc[]\n\n\
-  :imagesdir: 3_bazz\n\
   include::3_bazz/index.adoc[]\n\n");
 
   delete_result = delete_command::do_remove(3,&*content_path);
@@ -360,11 +357,10 @@ fn it_should_delete_sections() {
   "= delete test\n\
   awesome <awesome@blubb.com>\n\
   include::../includes/config.adoc[]\n\n\
+  :content: .\n\n\
   toc::[]\n\n\
   //BEGIN SECTIONS\n\
-  :imagesdir: 1_blubb\n\
   include::1_blubb/index.adoc[]\n\n\
-  :imagesdir: 2_foo\n\
   include::2_foo/index.adoc[]\n\n");
 
 

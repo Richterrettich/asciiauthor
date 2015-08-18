@@ -10,6 +10,8 @@ use std::cmp::Ordering;
 use std::path::Path;
 use std::io;
 use std::env;
+use std::io::BufReader;
+use std::io::BufRead;
 
 
 
@@ -77,13 +79,42 @@ pub fn rewrite_index(dir_entries: &mut Vec<Section>,base: &str) -> Result<(),err
     let entry_name = entry.to_string();
     let image_include = get_image_path(base,&*entry_name);
     includes_part.push_str(&*format!(
-      ":imagesdir: {}\n\
-      include::{}/index.adoc[]\n\n",image_include,entry_name));
+      "include::{}/index.adoc[]\n\n",entry_name));
   }
   let mut temp_file = try!(fs::File::create(format!("{}/temp_file",base)));
   try!(write!(temp_file,"{}{}",first_part,includes_part));
   try!(fs::rename(format!("{}/temp_file",&base),format!("{}/index.adoc",&base)));
   Ok(())
+}
+
+pub fn rewrite_sections(dir_entries: &mut Vec<Section>,base: &str) -> Result<(),error::BookError> {
+  for dir_entry in dir_entries {
+    let index_name = format!("{}/{}/index.adoc",base,dir_entry.to_string());
+    let file = try!(fs::File::open(index_name));
+    let temp_file = try!(fs::File::create(format!("{}/{}/temp_file",base,dir_entry.to_string())));
+    let mut reader = BufReader::new(&file);
+    let mut output = String::new();
+    for line in reader.lines() {
+      let line_string = line.unwrap();
+      let append_line = if line_string.starts_with(&*format!(":{}: {{",dir_entry.name)) {
+        format!(":{}: {{{}}}/{}",dir_entry.name,extract_parent_variable(base),dir_entry.to_string())
+      } else {
+        line_string
+      };
+      try!(write!(&temp_file,"{}\n",append_line));
+    }
+    try!(fs::rename(format!("{}/{}/temp_file",base,dir_entry.to_string()),format!("{}/{}/index.adoc",base,dir_entry.to_string())));
+  }
+  Ok(())
+}
+
+pub fn extract_parent_variable(path: &str) -> String {
+  let path_object = Path::new(path);
+  let mut parent_image_variable = path_object.file_name().unwrap().to_str().unwrap().to_string();
+  if parent_image_variable != "content" {
+    parent_image_variable = parent_image_variable.split('_').skip(1).collect::<Vec<&str>>().connect("_");
+  }
+  parent_image_variable
 }
 
 
@@ -236,6 +267,8 @@ fn create_git_config(path : &Path) -> Config {
   config.add_file(path, ConfigLevel::Global, false).ok();
   config
 }
+
+
 
 
 

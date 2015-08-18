@@ -45,6 +45,7 @@ pub fn do_move(mut first: usize, mut second: usize, base: &str) -> Result<(),err
 
   dir_entries[first].position = target_value;
   try!(util::rewrite_index(&mut dir_entries,base));
+  try!(util::rewrite_sections(&mut dir_entries,base));
 
   //try!(util::commit_project("post move commit",base));
   Ok(())

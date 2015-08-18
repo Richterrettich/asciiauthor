@@ -41,6 +41,7 @@ pub fn do_swap(mut first: usize, mut second: usize, base: &str) -> Result<(),err
     println!("rename {} to {}",old_name_of_first,new_name_of_first);
     try!(fs::rename(&old_name_of_first,new_name_of_first));
     try!(util::rewrite_index(&mut dir_entries,base));
+    try!(util::rewrite_sections(&mut dir_entries,base));
     Ok(())
   } else {
     Err(error::BookError::NormalBookError(format!("can't move section {} to {}",first,second)))
