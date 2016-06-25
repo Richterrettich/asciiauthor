@@ -1,6 +1,5 @@
-extern crate git2;
 
-use  std::error::Error;
+use std::error::Error;
 use std::fmt;
 use std::convert::From;
 use std::io;
@@ -39,8 +38,4 @@ impl From<io::Error> for BookError {
   }
 }
 
-impl From<git2::Error> for BookError {
-  fn from(err: git2::Error) ->  BookError {
-    BookError::NormalBookError(err.message().to_string())
-  }
-}
+

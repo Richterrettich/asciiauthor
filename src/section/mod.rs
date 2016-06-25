@@ -4,7 +4,6 @@ extern crate term_painter;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
-use std::io::Read;
 use std::io::{Write,Error};
 use error;
 use util;
@@ -44,7 +43,7 @@ fn add_part(title: &str,path: &str,level : usize) -> Result<(),error::BookError>
     options_include.push_str("../")
   }
 
-  let mut parent_image_variable = util::extract_parent_variable(path);
+  let parent_image_variable = util::extract_parent_variable(path);
   let section_name = format!("{}_{}",new_number,dir_name);
   options_include.push_str("includes/config.adoc[]\n");
   create_file!(path,
@@ -113,15 +112,6 @@ fn find_content_root(p: &str) -> Location {
         }
     };
 
-    let project_dir = Path::new(&*possible_root).parent().unwrap();
-    let f = File::open(project_dir.join(".git/description"));
-    let mut file_content = String::new();
-    if f.is_ok() {
-      f.ok().unwrap().read_to_string(&mut file_content).unwrap();
-      let content = file_content.split('_').last();
-      if content.is_some() && content.unwrap() == "book" {
-          return Location::InScope(possible_root.to_string(),depth);
-      }
-    }
-    Location::OutOfScope
+    //TODO find more robust way to figure out project root.
+    return Location::InScope(possible_root.to_string(),depth);
 }

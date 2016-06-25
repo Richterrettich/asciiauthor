@@ -1,20 +1,16 @@
 #[macro_use]
 extern crate clap;
 extern crate asciiauthor;
-extern crate git2;
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App, SubCommand,AppSettings};
 use asciiauthor::*;
 use std::env;
-use std::io::Error;
-
 
 fn main() {
   let matches = App::new("asciiauthor")
                         .version("0.1.0")
                         .author("Rene Richter <Richterrettich@gmail.com>")
                         .about("Project tool for asciidoctor")
-                        .subcommand_required_else_help(true)
-                        .versionless_subcommands(true)
+                        .setting(AppSettings::SubcommandRequired)
                         .subcommand(SubCommand::with_name("init")
                                     .about("initializes a new book project")
                                     .arg(Arg::with_name("name")
@@ -50,11 +46,9 @@ fn main() {
   let p = curret_dir.to_str().unwrap();
   match matches.subcommand() {
       ("init", Some(matches))   => {
-        let user_name = util::get_user_information("user.name");
-        let user_email = util::get_user_information("user.email");
         let raw_name = matches.value_of("name").unwrap();
         let (name,base) = util::split_name(raw_name);
-        print_result(init::init(name,&*user_email,&*user_name,base))
+        print_result(init::init(name,base))
       },
       ("section", Some(matches)) => {
           for v in matches.values_of("NAMES").unwrap() {

@@ -11,7 +11,6 @@ use self::term_painter::Color::*;
 
 pub fn do_move(mut first: usize, mut second: usize, base: &str) -> Result<(),error::BookError> {
 
-  //try!(util::commit_project("pre move commit",base));
   if first >= 1 {
     first = first - 1;
   }
@@ -47,6 +46,5 @@ pub fn do_move(mut first: usize, mut second: usize, base: &str) -> Result<(),err
   try!(util::rewrite_index(&mut dir_entries,base));
   try!(util::rewrite_sections(&mut dir_entries,base));
 
-  //try!(util::commit_project("post move commit",base));
   Ok(())
 }
