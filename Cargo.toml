@@ -4,7 +4,7 @@ version = "0.4.0"
 authors = ["Rene Richter <Richterrettich@gmail.com>"]
 
 [dependencies]
-clap = "2.6.0"
-mustache = "0.7.0"
-term-painter = "0.2.2"
+clap = "2.19.2"
+term-painter = "0.2.3"
 regex = "0.1.71"
+argf = "0.1.0"
