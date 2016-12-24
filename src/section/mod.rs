@@ -79,8 +79,7 @@ fn add_part(title: &str,
     }
 
     if let Some(input_files) = inputs {
-        let f = BufReader::new(argf::from_iterator(input_files.iter()
-            .map(|x| x.to_string())));
+        let f = BufReader::new(argf::from_slice(&input_files));
         let mut file = OpenOptions::new()
             .write(true)
             .append(true)
