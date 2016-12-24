@@ -1,8 +1,8 @@
 [root]
 name = "asciiauthor"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
- "argf 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "argf 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.19.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.1.80 (registry+https://github.com/rust-lang/crates.io-index)",
  "term-painter 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -23,7 +23,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "argf"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -167,7 +167,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [metadata]
 "checksum aho-corasick 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ca972c2ea5f742bfce5687b9aef75506a764f61d37f8f649047846a9686ddb66"
 "checksum ansi_term 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "23ac7c30002a5accbf7e8987d0632fa6de155b7c3d39d0067317a391e00a2ef6"
-"checksum argf 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "71e1e6017488f33860ffaaf1693eac5b6741fdf4db6a9d115e932429939f9f1d"
+"checksum argf 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "09fec7fb9bf22fbb4f32af746dc3dab7c0479df1169cb4b43a71341f0abdc7dd"
 "checksum bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aad18937a628ec6abcd26d1489012cc0e18c21798210f491af69ded9b881106d"
 "checksum clap 2.19.2 (registry+https://github.com/rust-lang/crates.io-index)" = "305ad043f009db535a110200541d4567b63e172b1fe030313fbb92565da7ed24"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"

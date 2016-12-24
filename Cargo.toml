@@ -1,10 +1,10 @@
 [package]
 name = "asciiauthor"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Rene Richter <Richterrettich@gmail.com>"]
 
 [dependencies]
 clap = "2.19.2"
 term-painter = "0.2.3"
 regex = "0.1.71"
-argf = "0.1.0"
+argf = "0.2.0"
