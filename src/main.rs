@@ -7,7 +7,7 @@ use std::env;
 
 fn main() {
     let matches = App::new("asciiauthor")
-        .version("0.1.0")
+        .version("0.7.0")
         .author("Rene Richter <Richterrettich@gmail.com>")
         .about("Project tool for asciidoctor")
         .setting(AppSettings::SubcommandRequired)
