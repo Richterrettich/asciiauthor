@@ -51,6 +51,14 @@ fn main() {
             .arg(Arg::with_name("number")
                 .required(true)
                 .help("the number of the section to delete.")))
+        .subcommand(SubCommand::with_name("compile")
+            .about("compiles the project into html")
+            .arg(Arg::with_name("backend")
+                .short("b")
+                .long("backend")
+                .value_name("FILE")
+                .help("the backend to use. Defaults to 'asciidoctor'")
+                .takes_value(true)))
         .get_matches();
 
     let curret_dir = env::current_dir().unwrap();
@@ -84,6 +92,14 @@ fn main() {
         ("delete", Some(matches)) => {
             let number = value_t_or_exit!(matches.value_of("number"), usize);
             print_result(delete_command::do_remove(number, p))
+        }
+        ("compile", Some(matches)) => {
+            if let Some(backend) = matches.value_of("backend") {
+                println!("{}",backend);
+                print_result(compile_command::compile(p,backend));
+            } else {
+                print_result(compile_command::compile(p,"asciidoctor"));
+            }
         }
 
         _ => {}
