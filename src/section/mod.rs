@@ -14,15 +14,11 @@ use std::fs::OpenOptions;
 
 
 
-enum Location {
-    InScope(String, usize),
-    OutOfScope,
-}
 
 pub fn section(name: &str, dir: &str, inputs: Option<Vec<&str>>) -> Result<(), error::BookError> {
-    match find_content_root(dir) {
-        Location::InScope(_path, level) => add_part(name, dir, level, inputs),
-        Location::OutOfScope => {
+    match util::find_content_root(dir) {
+        util::Location::InScope(_path, level) => add_part(name, dir, level, inputs),
+        util::Location::OutOfScope => {
             Err(error::BookError::NormalBookError("not within project directory.".to_string()))
         }
     }
@@ -115,21 +111,3 @@ fn find_last_number(path: &str) -> Result<usize, Error> {
     Ok(highest_number)
 }
 
-
-fn find_content_root(p: &str) -> Location {
-    let file_name = Path::new(p).file_name().unwrap().to_str().unwrap();
-    let (possible_root, depth) = if file_name == "content" {
-        (p.to_string(), 1)
-    } else {
-        let parts: Vec<&str> = p.split("/content/").collect();
-        if parts.len() >= 1 {
-            let last_bits: Vec<&str> = parts.last().unwrap().split("/").collect();
-            (format!("{}/content", parts[0]), last_bits.len() + 1)
-        } else {
-            return Location::OutOfScope;
-        }
-    };
-
-    // TODO find more robust way to figure out project root.
-    return Location::InScope(possible_root.to_string(), depth);
-}

@@ -215,3 +215,28 @@ pub fn get_image_path(path: &str, dir_name: &str) -> String {
     dir_name.to_string()
   }
 }
+
+
+pub enum Location {
+    InScope(String, usize),
+    OutOfScope,
+}
+
+
+pub fn find_content_root(p: &str) -> Location {
+    let file_name = Path::new(p).file_name().unwrap().to_str().unwrap();
+    let (possible_root, depth) = if file_name == "content" {
+        (p.to_string(), 1)
+    } else {
+        let parts: Vec<&str> = p.split("/content/").collect();
+        if parts.len() >= 1 {
+            let last_bits: Vec<&str> = parts.last().unwrap().split("/").collect();
+            (format!("{}/content", parts[0]), last_bits.len() + 1)
+        } else {
+            return Location::OutOfScope;
+        }
+    };
+
+    // TODO find more robust way to figure out project root.
+    return Location::InScope(possible_root.to_string(), depth);
+}
