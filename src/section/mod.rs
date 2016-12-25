@@ -15,7 +15,7 @@ use std::fs::OpenOptions;
 
 
 
-pub fn section(name: &str, dir: &str, inputs: Option<Vec<&str>>) -> Result<(), error::BookError> {
+pub fn section(name: &str, dir: &str, inputs: Option<clap::Values>) -> Result<(), error::BookError> {
     match util::find_content_root(dir) {
         util::Location::InScope(_path, level) => add_part(name, dir, level, inputs),
         util::Location::OutOfScope => {
@@ -27,7 +27,7 @@ pub fn section(name: &str, dir: &str, inputs: Option<Vec<&str>>) -> Result<(), e
 fn add_part(title: &str,
             path: &str,
             level: usize,
-            inputs: Option<Vec<&str>>)
+            inputs: Option<clap::Values>)
             -> Result<(), error::BookError> {
 
     let dir_name = util::replace_spaces(title);
@@ -75,7 +75,7 @@ fn add_part(title: &str,
     }
 
     if let Some(input_files) = inputs {
-        let f = BufReader::new(argf::from_slice(&input_files));
+        let f = BufReader::new(argf::from_slice(&input_files.collect::<Vec<&str>>()));
         let mut file = OpenOptions::new()
             .write(true)
             .append(true)

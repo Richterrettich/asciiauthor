@@ -63,8 +63,8 @@ fn main() {
         }
         ("section", Some(matches)) => {
             let name = matches.value_of("NAME").unwrap();
-            let inputs = matches.values_of("INPUTS").unwrap();
-            print_result(section::section(name, p, Some(inputs.collect())));
+            let inputs = matches.values_of("INPUTS");
+            print_result(section::section(name, p, inputs));
         }
         ("sections", Some(matches)) => {
             for v in matches.values_of("NAMES").unwrap() {
