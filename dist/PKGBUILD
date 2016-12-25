@@ -1,0 +1,43 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# The following guidelines are specific to BZR, GIT, HG and SVN packages.
+# Other VCS sources are not natively supported by makepkg yet.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=asciiauthor 
+pkgver=0.7.0
+pkgrel=1
+pkgdesc="A Project generator for asciidoc projects"
+arch=(x86_64)
+url=""
+license=('GPL')
+groups=()
+depends=()
+makedepends=('rust' "cargo" "git") 
+provides=("${pkgname}")
+replaces=()
+backup=()
+options=()
+install=
+source=('asciiauthor::git+https://github.com/Richterrettich/asciiauthor.git')
+noextract=()
+md5sums=('SKIP')
+
+prepare() {
+	cd "$srcdir/${pkgname}"
+	git checkout $pkgver
+}
+
+build() {
+	cd "$srcdir/${pkgname}"
+	cargo build --release
+}
+
+package() {
+	cd "$srcdir/${pkgname}"
+	mkdir -p $pkgdir/usr/bin
+	mv target/release/asciiauthor "$pkgdir/usr/bin"
+}
